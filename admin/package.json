@@ -1,0 +1,52 @@
+{
+  "name": "htadmin",
+  "version": "1.0.0",
+  "description": "This is a admin page of NaturalDAO commemorative tokens",
+  "private": false,
+  "main": "dist/index.js",
+  "homepage": ".",
+  "dependencies": {
+    "@material-ui/core": "^4.9.9",
+    "@material-ui/icons": "^4.1.0",
+    "classnames": "^2.2.6",
+    "copy-to-clipboard": "^3.3.1",
+    "ethers": "^4.0.46",
+    "i18next": "^19.3.4",
+    "i18next-browser-languagedetector": "^4.0.2",
+    "i18next-xhr-backend": "^3.2.2",
+    "jazzicon": "^1.5.0",
+    "perfect-scrollbar": "^1.5.0",
+    "polished": "^3.5.1",
+    "prop-types": "^15.7.2",
+    "react": "^16.13.1",
+    "react-device-detect": "^1.11.14",
+    "react-dom": "^16.13.1",
+    "react-feather": "^2.0.3",
+    "react-file-picker": "0.0.6",
+    "react-i18next": "^11.3.4",
+    "react-resize-detector": "^4.2.1",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "^3.4.1",
+    "reactjs-localstorage": "0.0.8",
+    "styled-components": "^5.0.1",
+    "svgson": "^4.0.0",
+    "web3-react": "^5.0.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "4.3.0",
+    "eslint-plugin-prettier": "3.1.0",
+    "prettier": "1.18.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": []
+  }
+}

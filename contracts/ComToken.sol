@@ -1,13 +1,9 @@
-pragma solidity ^ 0.5 .0;
+pragma solidity ^ 0.5.0;
 
 
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
 import './Strings.sol';
-
-interface IERC20Mintable() {
-    function mint(address account, uint256 amount) public returns (bool);
-}
 
 
 //以下是为了接入opensea
@@ -20,7 +16,7 @@ contract ProxyRegistry {
 
 
 //主合约，实现了一个721创建多种NFT
-contract MoleCoin is ERC721Full, Ownable {
+contract ComToken is ERC721Full, Ownable {
     using Strings for string;
     //纪念币能发行的最大数量
     uint constant MAX_LIMIT = uint(uint128(~0));
@@ -30,7 +26,7 @@ contract MoleCoin is ERC721Full, Ownable {
     uint constant TYPE_MASK = uint(uint128(~0)) << 128;
     //alhpa钱包所需要支持的接口
     /* bytes4(keccak256('getBalances(address)')) == 0xc84aae17 */
-    bytes4 private constant _INTERFACE_ID_COIN_BALANCES = 0xc84aae17;
+    bytes4 private constant _INTERFACE_ID_Token_BALANCES = 0xc84aae17;
     //获取代币图标，自定义接口
     /* bytes4(keccak256('getTokenImageSvg(uint256)')) == 0x87d2f48c */
     bytes4 private constant _INTERFACE_ID_TOKEN_IMAGE_SVG = 0x87d2f48c;
@@ -40,47 +36,47 @@ contract MoleCoin is ERC721Full, Ownable {
         uint amount; //已经发行数量
         uint buyAmount;//已经购买数量
         uint limit; //发行上限
+        uint buyLimit;//购买上限
         uint price; //每个售价
-        uint repAmount; //获得声望
         address payable beneficiary;     //收益人
         string baseURI; //baseURI
         string icon; //SVG图片
-
     }
 
     //白名单（代理）
     address proxyRegistryAddress;
     //纪念币类型索引
-    uint public typeNonce;
+    uint public nonce;
     //所有纪念币类型信息
-    mapping(uint => TokenInfo) public tokenInfos;
+    mapping(uint => TokenInfo) public tokenInfos;  // type => info
     //用户创建的纪念币类型
-    mapping(address => uint[]) public nftTypes;
-    //每个纪念币的初始购买者，用于以后发代币和声望
-    /* mapping(uint => address) public tokenOrigin; */
-
-    IERC20Mintable public rep;
+    mapping(address => uint[]) public nftTypes;     //creator => type[]
 
     //event
-    event CreateCoin(address indexed creator,uint typeId);
+    event CreateToken(address indexed creator,uint typeId);
     event ChangePrice(address indexed operator,uint indexed typeId,uint newPrice);
     event ChangeBaseURI(address indexed operator,uint indexed typeId,string newURI);
-    event BuyCoin(address indexed _buyer,address indexed _recipient, uint _tokenId);
-    event SendCoin(address indexed _operator,address indexed _recipient, uint _tokenId);
+    event BuyToken(address indexed _buyer,address indexed _recipient, uint _tokenId);
+    event MintToken(address indexed _operator,uint indexed typeId);
 
-    constructor(string memory name, string memory symbol, address _proxyRegistryAddress,adddress _repAddress) public ERC721Full(name, symbol) {
-        require(_proxyRegistryAddress != address(0) && _repAddress != address(0),"MoleCoin: Zero Address");
+    //仅限创建者
+    modifier onlyCreator(uint typeId) {
+        require(tokenInfos[typeId].creator == _msgSender(),"ComToken: permission denied");
+        _;
+    }
+
+    constructor(string memory name, string memory symbol, address _proxyRegistryAddress) public ERC721Full(name, symbol) {
+        require(_proxyRegistryAddress != address(0),"ComToken: Zero Address");
         proxyRegistryAddress = _proxyRegistryAddress;
-        rep = IERC20Mintable(_repAddress)
-        _registerInterface(_INTERFACE_ID_COIN_BALANCES);
+        _registerInterface(_INTERFACE_ID_Token_BALANCES);
         _registerInterface(_INTERFACE_ID_TOKEN_IMAGE_SVG);
     }
 
     //检查是否类型ID
     function isType(uint _typeId) public view returns(bool) {
         //首先判断是否在范围内
-        uint nonce = getTypeBase(_typeId);
-        if(nonce == 0 || nonce > typeNonce) {
+        uint _nonce = getTypeBase(_typeId);
+        if(_nonce == 0 || _nonce > nonce) {
             return false;
         }
         //判断是否tokenId
@@ -113,31 +109,33 @@ contract MoleCoin is ERC721Full, Ownable {
             return false;
         }
         return true;
-
     }
+
     //为了简化，使用类型的基本索引来获取相应类型信息
-    //返回参数分别为[创建者、收益人]、[已发行数量、发行上限、发行售价]、baseURI、icon
-    function getTokenInfoByTypeNonce(uint _typeNonce) public view returns(
-        address[2] memory addrs,
-        uint[3] memory nums,
-        string memory _baseURI,
-        string memory _icon)
-    {
-        require(_typeNonce > 0 && _typeNonce <= typeNonce,"MoleCoin: type is not existed");
-        uint type_id = _typeNonce << 128;
+    //返回参数分别为[创建者、收益人]、[发行上限、已发行数量、出售上限、已经售出数量、售价]
+    function getInfoByNonce(uint _nonce) public view returns(address[2] memory addrs,uint[5] memory nums) {
+        require(_nonce > 0 && _nonce <= nonce,"ComToken: nonce is not existed");
+        uint type_id = _nonce << 128;
         TokenInfo memory info = tokenInfos[type_id];
         addrs[0] = info.creator;
         addrs[1] = info.beneficiary;
-        nums[0] = info.amount;
-        nums[1] = info.limit;
-        nums[2] = info.price;
-        _baseURI = info.baseURI;
-        _icon = info.icon;
+        nums[0] = info.limit;
+        nums[1] = info.amount;
+        nums[2] = info.buyLimit;
+        nums[3] = info.buyAmount;
+        nums[4] = info.price;
+    }
+
+    //获取每种类型的基础URI，为了简化，使用类型的基本索引来获取信息
+    function getTypeURI(uint _nonce) public view returns(string memory) {
+        require(_nonce > 0 && _nonce <= nonce,"ComToken: nonce is not existed");
+        uint type_id = _nonce << 128;
+        return tokenInfos[type_id].baseURI;
     }
 
     //获取每个代币的uri，兼容opensea
     function tokenURI(uint _tokenId) external view returns(string memory) {
-        require(isExisted(_tokenId),"MoleCoin: tokenId is not existed");
+        require(isExisted(_tokenId),"ComToken: tokenId is not existed");
         uint _type = getType(_tokenId);
         string memory base_uri = tokenInfos[_type].baseURI;
         return Strings.strConcat(
@@ -163,71 +161,73 @@ contract MoleCoin is ERC721Full, Ownable {
     }
 
     //创建纪念币
-    function createCoin(uint _buyLimt, uint _price,uint _repAmount,address payable _beneficiary, string calldata _baseURI, string calldata _icon)
+    function createToken(uint _limit,uint _buyLimt, uint _price,address payable _beneficiary, string calldata _baseURI, string calldata _icon)
     external
     onlyOwner
     returns(uint _typeId) {
-        require(_buyLimt < MAX_LIMIT, "MoleCoin: out of max_limit");
-        require(typeNonce.add(1) <= MAX_LIMIT,"MoleCoin: out of limit");
-        _typeId = (++typeNonce) << 128;
+        require(_buyLimt < MAX_LIMIT && _limit < MAX_LIMIT, "ComToken: out of max_limit");
+        //如果发行上限为0，则代表无上限
+        uint limit = _limit;
+        if (limit == 0) {
+            limit = MAX_LIMIT - 1;
+        }
+        require(_buyLimt <= limit, "ComToken: buyLimit error");
+        require(nonce + 1 <= MAX_LIMIT,"ComToken: the amount of type is maxinum");
+        _typeId = (++nonce) << 128;
         TokenInfo memory info = TokenInfo(
-            _msgSender(),
-            0,
-            _buyLimt,
-            _price,
-            _repAmount,
+            _msgSender(), //创建者
+            0,  //已经发行数量
+            0,  //已经购买数量
+            limit, //发行上限
+            _buyLimt,  //购买上限
+            _price, //每个售价
             _beneficiary,
             _baseURI,
             _icon
         );
         tokenInfos[_typeId] = info;
         nftTypes[_msgSender()].push(_typeId);
-        emit CreateCoin(_msgSender(),_typeId);
+        emit CreateToken(_msgSender(),_typeId);
     }
 
     //用户购买纪念币
-    function buyCoin(uint typeId, address recipient) external payable {
-        require(isType(typeId), "MoleCoin: not a type");
+    function buyToken(uint typeId, address recipient) external payable {
+        require(isType(typeId), "ComToken: not a type");
         TokenInfo storage info = tokenInfos[typeId];
-        require(msg.value >= info.price, "MoleCoin: insufficient ethers or zero price");
+        require(msg.value >= info.price, "ComToken: insufficient ethers or zero price");
         //总数量和购买数量都加1
         info.amount ++;
         info.buyAmount ++;
         //限定出售数量
-        require(info.buyAmount <= info.limit && info.amount < MAX_LIMIT, "MoleCoin: out of the limit");
+        require(info.buyAmount <= info.buyLimit && info.amount <= info.limit, "ComToken: out of the limit");
         uint id = typeId | info.amount;
         _mint(recipient, id);
-        rep.mint(recipient,info.repAmount);
         info.beneficiary.transfer(msg.value);
-        emit BuyCoin(_msgSender(),recipient,id);
+        emit BuyToken(_msgSender(),recipient,id);
     }
 
-    //创建者赠送纪念币
-    function sendCoin(uint typeId, address recipient) external {
-        require(isType(typeId), "MoleCoin: not a type");
+    //创建者批量赠送
+    function mintToken(uint typeId,address[] calldata to) external onlyCreator(typeId) {
         TokenInfo storage info = tokenInfos[typeId];
-        require(_msgSender() == info.creator,"MoleCoin: permission denied");
-        info.amount ++;
-        require(info.amount < MAX_LIMIT,"MoleCoin: out of the limit");
-        uint id = typeId | info.amount;
-        _mint(recipient, id);
-        rep.mint(recipient,info.repAmount);
-        emit SendCoin(_msgSender(),recipient,id);
+        uint len = to.length;
+        require(info.amount.add(len) <= info.limit,"ComToken: out of the limit");
+        for (uint i = 0;i < len;i++) {
+            uint id = typeId | (info.amount + i + 1);
+            _mint(to[i], id);
+        }
+        info.amount = info.amount.add(len);
+        emit MintToken(_msgSender(),typeId);
     }
 
     //创建者改变纪念币价格
-    function changePrice(uint typeId,uint newPrice) external {
-        require(isType(typeId), "MoleCoin: not a type");
+    function changePrice(uint typeId,uint newPrice) external onlyCreator(typeId) {
         TokenInfo storage info = tokenInfos[typeId];
-        require(_msgSender() == info.creator,"MoleCoin: permission denied");
         info.price = newPrice;
         emit ChangePrice(info.creator,typeId,newPrice);
     }
 
-    function changeBaseURI(uint typeId,string calldata _url) external {
-        require(isType(typeId), "MoleCoin: not a type");
+    function changeBaseURI(uint typeId,string calldata _url) external onlyCreator(typeId) {
         TokenInfo storage info = tokenInfos[typeId];
-        require(_msgSender() == info.creator,"MoleCoin: permission denied");
         info.baseURI = _url;
         emit ChangeBaseURI(info.creator,typeId,_url);
     }

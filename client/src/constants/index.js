@@ -1,0 +1,7 @@
+export const MOLE_ADDRESS = {
+    1: '',
+    3: '',
+    4: '0x1F282024D3A191856B65AE59E8AbCeAf76254D99',
+    42: '',
+    5777:'0x761c48B1aBD18a53463167A37bB939B2B7f70e37'
+}
