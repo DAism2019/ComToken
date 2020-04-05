@@ -1,4 +1,4 @@
-const MoleCoin = artifacts.require("MoleCoin");
+const ComToken = artifacts.require("ComToken");
 
 module.exports = function(deployer, network) {
     let proxyRegistryAddress = ""
@@ -7,5 +7,5 @@ module.exports = function(deployer, network) {
     } else {
         proxyRegistryAddress = "0xa5409ec958c83c3f309868babaca7c86dcb077c1";
     }
-    deployer.deploy(MoleCoin, "NaturalDAO Coins","NDC",proxyRegistryAddress);
+    deployer.deploy(ComToken, "NaturalDAO Coins","NDC",proxyRegistryAddress);
 };

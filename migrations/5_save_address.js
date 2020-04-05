@@ -1,11 +1,11 @@
 const fsService = require('../scripts/fileService');
 const fileName = "./test/address.json";
 
-const MoleCoin = artifacts.require("MoleCoin");
+const ComToken = artifacts.require("ComToken");
 
 
 const data = {
-    "MoleCoin": MoleCoin.address
+    "ComToken": ComToken.address
 }
 
 module.exports = function(deployer) {

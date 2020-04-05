@@ -25,7 +25,7 @@ import Container from '@material-ui/core/Container';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import { useSnackbarContext } from 'contexts/SnackBarProvider.jsx';
 
-const COOKIEID = process.env.REACT_APP_APPKEY
+const APIKEY = process.env.REACT_APP_APPKEY
 const USERNAME = 'username'
 const PASSWORD = 'password'
 const CHECKED = 'checked'
@@ -107,7 +107,7 @@ export default function SignIn({onLogin}) {
   };
   function onSubmit(event){
       event.preventDefault();
-      reactLocalStorage.setObject(COOKIEID,values)
+      reactLocalStorage.setObject(APIKEY,values)
       if (values.username && values.password && values.username === PRE_USERNAME && values.password === PRE_PASSWORD){
           if(onLogin)
             onLogin()
@@ -124,7 +124,7 @@ export default function SignIn({onLogin}) {
   };
 
   useEffect(()=>{
-      let initInfos = reactLocalStorage.getObject(COOKIEID)
+      let initInfos = reactLocalStorage.getObject(APIKEY)
       if(initInfos[USERNAME] && initInfos[PASSWORD] && initInfos[CHECKED]===true){
           setValues({
               [USERNAME]:initInfos[USERNAME],

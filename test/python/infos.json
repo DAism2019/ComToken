@@ -1,21 +1,21 @@
 {
     "gold":{
-        "price":66.66,
+        "price":0.6666,
         "amount":10,
         "icon":"cnt-gold.svg"
     },
     "rosegold":{
-        "price":46.66,
+        "price":0.4666,
         "amount":46,
         "icon":"cnt-rosegold.svg"
     },
     "silver":{
-        "price":3.66,
+        "price":0.366,
         "amount":366,
         "icon":"cnt-silver.svg"
     },
     "mouse":{
-        "price":0.6666,
+        "price":0.16666,
         "amount":6666,
         "icon":"cnt-2020.svg"
     }

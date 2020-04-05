@@ -52,7 +52,7 @@ const switchRoutes = (
       }
       return null;
     })}
-    <Redirect from="/" to="/coinadmin" />
+    <Redirect from="/" to="/all" />
   </Switch>
 );
 

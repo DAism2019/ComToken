@@ -7,11 +7,11 @@
 # 6、纪念币最初购买者
 # 7、纪念币总数量
 # 8、更改纪念币价格与URI
-from contract import MoleCoin
+from contract import Token
 from privateKey import my_address, private_key
 from os.path import dirname, abspath
-from web3.auto.infura.rinkeby import w3
-# from web3.auto import w3
+# from web3.auto.infura.rinkeby import w3
+from web3.auto import w3
 from urllib.request import urlopen
 from json import loads
 import ssl
@@ -44,22 +44,25 @@ def getIcon(svg_name):
 
 #纪念币链上信息
 def getTypeAmount():
-    amount = MoleCoin.functions.typeNonce().call()
+    amount = Token.functions.nonce().call()
     print("当前创建的纪念币数量为:", amount, "编号分别为:")
     for i in range(amount):
         index = (i + 1) << 128
         print("当前纪念币的类型编号为:", hex(index))
-        info = MoleCoin.functions.tokenInfos(index).call()
-        print("纪念币创建者为:", info[0])
-        print("已发行数量为:", info[1])
-        print("发行上限为:", info[2])
-        print("发行价格为:", info[3] / 10**18, " ETH")
-        print("收益人为:", info[4])
-        print("baseURI为:", info[5])
-        print("icon的长度为:", len(info[6]))
+        info = Token.functions.getInfoByNonce(i+1).call()
+        print("纪念币创建者为:", info[0][0])
+        print("纪念币收益人为:", info[0][1])
+        print("发行上限为:", info[1][0])
+        print("已发行数量为:", info[1][1])
+        print("出售上限为:", info[1][2])
+        print("已出售数量为:", info[1][3])
+        print("发行价格为:", info[1][4] / 10**18, " ETH")
+        baseURI = Token.functions.getTypeURI(i+1).call()
+        print("基准URI为:",baseURI)
 
 
-# createCoin(uint _maxLimt, uint _price,address payable _beneficiary, string calldata _baseURI, string calldata _icon)
+
+# createCoin(uint _limit, uint _buyLimt, uint _price,address payable _beneficiary, string calldata _baseURI, string calldata _icon)
 #创建纪念币
 # coin_name [gold,rosegold,silver,mouse]
 def createCoin(coin_name):
@@ -68,11 +71,11 @@ def createCoin(coin_name):
     price = int(info['price'] * (10**18))
     amount = info['amount']
     svg = getIcon(info['icon'])
-    args = [amount, price, beneficiary, 'https://kaihua.xyz/nd/token/',svg]
+    args = [0,amount, price, beneficiary, 'https://kaihua.xyz/nd/token/',svg]
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = MoleCoin.functions.createCoin(*args).buildTransaction({
+    unicorn_txn = Token.functions.createToken(*args).buildTransaction({
         'nonce': nonce,
-        'gas':9000000,
+        # 'gas':9000000,
         'gasPrice': 3 * (10 ** 9)
     })
     signed_txn = w3.eth.account.signTransaction(
@@ -88,9 +91,9 @@ def createCoin(coin_name):
 
 #获取纪念币余额
 def getTokenBalance(address):
-    balance = MoleCoin.functions.balanceOf(address).call()
+    balance = Token.functions.balanceOf(address).call()
     print("当前地址", address, "的代币数量为:", balance)
-    ids = MoleCoin.functions.getBalances(address).call()
+    ids = Token.functions.getBalances(address).call()
     print("所有代币的ID为:")
     for id in ids:
         print(hex(id))
@@ -100,15 +103,15 @@ def getTokenBalance(address):
 def buyCoin(token_type, owner):
     args = [token_type, owner]
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = MoleCoin.functions.buyCoin(*args).buildTransaction({
+    unicorn_txn = Token.functions.buyToken(*args).buildTransaction({
         'nonce': nonce,
-        'value': int(1 * 10**18)
+        'value': int(0.6666 * 10**18)
         # 'gas':300000
     })
     signed_txn = w3.eth.account.signTransaction(
         unicorn_txn, private_key=private_key)
     hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-    print("购买代币交易已经发送")
+    print("购买纪念币交易已经发送")
     result = w3.eth.waitForTransactionReceipt(hash)
     if result.status == 1:
         print("交易成功")
@@ -117,19 +120,14 @@ def buyCoin(token_type, owner):
 
 #纪念币发行总数量
 def getSupply():
-    supply = MoleCoin.functions.totalSupply().call()
+    supply = Token.functions.totalSupply().call()
     print("当前所有纪念币数量为:",supply)
 
-
-#纪念币最初购买者
-def getOrigin(tokenId):
-    origin = MoleCoin.functions.tokenOrigin(tokenId).call()
-    print("当前编号为:", hex(tokenId), "的最初购买者为:",origin)
 
 
 #获取纪念币元数据
 def getTokenURI(token_id):
-    uri = MoleCoin.functions.tokenURI(token_id).call()
+    uri = Token.functions.tokenURI(token_id).call()
     print("当前编号为:", token_id, "的URI为:",uri)
     with urlopen(uri) as response:
         if response.status == 200:
@@ -137,11 +135,12 @@ def getTokenURI(token_id):
         else:
             print("访问uri错误")
 
+
 #更改纪念币价格
 def changePrice(typeId,newPrice):
     args = [typeId, int(newPrice * 10**18)]
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = MoleCoin.functions.changePrice(*args).buildTransaction({
+    unicorn_txn = Token.functions.changePrice(*args).buildTransaction({
         'nonce': nonce,
         'gas':300000
     })
@@ -160,7 +159,7 @@ def changePrice(typeId,newPrice):
 def changeBaseURI(typeId,new_uri):
     args = [typeId, new_uri]
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = MoleCoin.functions.changeBaseURI(*args).buildTransaction({
+    unicorn_txn = Token.functions.changeBaseURI(*args).buildTransaction({
         'nonce': nonce,
     })
     signed_txn = w3.eth.account.signTransaction(
@@ -180,19 +179,17 @@ def changeBaseURI(typeId,new_uri):
 # createCoin('rosegold')
 # createCoin('silver')
 # createCoin('mouse')
-# getTypeAmount()
+getTypeAmount()
 # changeBaseURI(0x100000000000000000000000000000000,"https://kaihua.xyz/daism/token/")
 
-# buyCoin(0x400000000000000000000000000000000,my_address)
+# buyCoin(0x100000000000000000000000000000000,my_address)
 # getTokenBalance(my_address)
 # buyCoin(0x300000000000000000000000000000000,work_address)
 # mintToken(0x100000000000000000000000000000000,work_address)
 # getTokenBalance(work_address)
-# getTokenURI(0x500000000000000000000000000000001)
+# getTokenURI(0x100000000000000000000000000000001)
 # getTokenURI(0x400000000000000000000000000000001)
 # getSupply()
 # getOrigin(0x200000000000000000000000000000001)
 # changePrice(0x100000000000000000000000000000000,0.008)
-changePrice(0x200000000000000000000000000000000,0.004)
-changePrice(0x300000000000000000000000000000000,0.002)
-changePrice(0x400000000000000000000000000000000,0.001)
+

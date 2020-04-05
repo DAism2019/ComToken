@@ -127,10 +127,17 @@ contract ComToken is ERC721Full, Ownable {
     }
 
     //获取每种类型的基础URI，为了简化，使用类型的基本索引来获取信息
-    function getTypeURI(uint _nonce) public view returns(string memory) {
+    function getTypeURI(uint _nonce) external view returns(string memory) {
         require(_nonce > 0 && _nonce <= nonce,"ComToken: nonce is not existed");
         uint type_id = _nonce << 128;
         return tokenInfos[type_id].baseURI;
+    }
+
+    //获取每种类型的svg
+    function getTypeSVG(uint _nonce) external view returns(string memory) {
+        require(_nonce > 0 && _nonce <= nonce,"ComToken: nonce is not existed");
+        uint type_id = _nonce << 128;
+        return tokenInfos[type_id].icon;
     }
 
     //获取每个代币的uri，兼容opensea
@@ -155,7 +162,7 @@ contract ComToken is ERC721Full, Ownable {
     function getUserCreated(address _creator) public view returns(uint) {
         return nftTypes[_creator].length;
     }
-    //在用户创建纪念币数量较少的情况下一次性返回所有创建的纪念币类型ID
+    //在用户创建纪念币数量较少的情况下一次性返回所有创建的纪念币类型ID(为了简化，返回的是基础类型，也就是右移128位后的结果)
     function getUserAllCreated(address _creator) public view returns(uint[] memory) {
         return nftTypes[_creator];
     }
@@ -186,7 +193,7 @@ contract ComToken is ERC721Full, Ownable {
             _icon
         );
         tokenInfos[_typeId] = info;
-        nftTypes[_msgSender()].push(_typeId);
+        nftTypes[_msgSender()].push(nonce);
         emit CreateToken(_msgSender(),_typeId);
     }
 

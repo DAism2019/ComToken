@@ -15,16 +15,24 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. */
 // @material-ui/icons
 
-// import LibraryBooks from "@material-ui/icons/LibraryBooks";
-// import CoinAdmin from "views/CoinAdmin/CoinAdmin.jsx";
+import LibraryBooks from "@material-ui/icons/LibraryBooks";
+// import Payment from "@material-ui/icons/Payment";
+// import CreateToken from "views/CreateToken/CreateToken.jsx";
+import AllTokens from "views/AllTokens/AllTokens.jsx";
 
 
-const dashboardRoutes = [
+const dashboardRoutes = [{
+        path: "all",
+        name: "all_token",
+        icon: LibraryBooks,
+        component: AllTokens,
+        layout: "/"
+    }
     // {
-    //     path: "coinadmin",
-    //     name: "纪念币管理",
-    //     icon: LibraryBooks,
-    //     component: CoinAdmin,
+    //     path: "new",
+    //     name: "new_token",
+    //     icon: Payment,
+    //     component: CreateToken,
     //     layout: "/"
     // }
 ];

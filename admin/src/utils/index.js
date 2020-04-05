@@ -1,6 +1,6 @@
 import { ethers,utils } from 'ethers'
-import MOLE_ABI from 'constants/abis/mole.json'
-import { MOLE_ADDRESS } from '../constants'
+import TOKEN_ABI from 'constants/abis/token.json'
+import { TOKEN_ADDRESS } from '../constants'
 import UncheckedJsonRpcSigner from './signer'
 
 const ZERO_UINT128 = "00000000000000000000000000000000"
@@ -119,8 +119,8 @@ export function getContract(address, ABI, library, account) {
 }
 
 
-export function getMoleContract(networkId,library,account){
-    return getContract(MOLE_ADDRESS[networkId], MOLE_ABI, library, account)
+export function getTokenContract(networkId,library,account){
+    return getContract(TOKEN_ADDRESS[networkId], TOKEN_ABI, library, account)
 }
 
 
@@ -143,13 +143,17 @@ export function convertTimetoTimeString(_times) {
 }
 
 export function getFirstContextByLabel(source,label){
-    let label_start = '<' + label + '>'
+    let label_start = '<' + label
     let label_end = '</' + label + '>'
-    let start = source.indexOf(label_start)
+    let start = source.indexOf(label_start) 
+    if (start === -1) {
+      return ""
+    }
     let startIndex = start + label_start.length
+    let start_close = source.indexOf(">",startIndex)
     let end = source.indexOf(label_end)
-    if( start !== -1 && end !== -1){
-        return source.substring(startIndex,end)
+    if( end !== -1){
+        return source.substring(start_close + 1,end)
     }else{
         return ''
     }
