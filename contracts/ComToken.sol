@@ -176,7 +176,7 @@ contract ComToken is ERC721Full, Ownable {
         //如果发行上限为0，则代表无上限
         uint limit = _limit;
         if (limit == 0) {
-            limit = MAX_LIMIT - 1;
+            limit = MAX_LIMIT;
         }
         require(_buyLimt <= limit, "ComToken: buyLimit error");
         require(nonce + 1 <= MAX_LIMIT,"ComToken: the amount of type is maxinum");
@@ -213,11 +213,13 @@ contract ComToken is ERC721Full, Ownable {
         emit BuyToken(_msgSender(),recipient,id);
     }
 
-    //创建者批量赠送
+    //创建者批量赠送(赠送不占用出售数量)
     function mintToken(uint typeId,address[] calldata to) external onlyCreator(typeId) {
         TokenInfo storage info = tokenInfos[typeId];
         uint len = to.length;
-        require(info.amount.add(len) <= info.limit,"ComToken: out of the limit");
+        uint hasMint = info.amount.sub(info.buyAmount);
+        require(hasMint.add(len) <= info.limit.sub(info.buyLimit),"ComToken: out of the mint limit");
+        // require(info.amount.add(len) <= info.limit,"ComToken: out of the limit");
         for (uint i = 0;i < len;i++) {
             uint id = typeId | (info.amount + i + 1);
             _mint(to[i], id);

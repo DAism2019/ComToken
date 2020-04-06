@@ -16,10 +16,14 @@
 // @material-ui/icons
 
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-// import Payment from "@material-ui/icons/Payment";
-// import CreateToken from "views/CreateToken/CreateToken.jsx";
-import AllTokens from "views/AllTokens/AllTokens.jsx";
+import HowToReg from "@material-ui/icons/HowToReg";
+import BubbleChart from "@material-ui/icons/BubbleChart";
+import Unarchive from "@material-ui/icons/Unarchive";
 
+import CreateToken from "views/CreateToken/CreateToken.jsx";
+import AllTokens from "views/AllTokens/AllTokens.jsx";
+import OwnerAdmin from "views/OwnerAdmin/OwnerAdmin.jsx";
+import TokenDetail from "views/TokenDetail/TokenDetail.jsx";
 
 const dashboardRoutes = [{
         path: "all",
@@ -27,14 +31,28 @@ const dashboardRoutes = [{
         icon: LibraryBooks,
         component: AllTokens,
         layout: "/"
+    },
+    {
+        path: "create",
+        name: "create_token",
+        icon: BubbleChart,
+        component: CreateToken,
+        layout: "/"
+    },
+    {
+        path: "owner",
+        name: "owner_admin",
+        icon: HowToReg,
+        component: OwnerAdmin,
+        layout: "/"
+    },
+    {
+        path: "detail",
+        name: "token_detail",
+        icon: Unarchive,
+        component: TokenDetail,
+        layout: "/"
     }
-    // {
-    //     path: "new",
-    //     name: "new_token",
-    //     icon: Payment,
-    //     component: CreateToken,
-    //     layout: "/"
-    // }
 ];
 
 export default dashboardRoutes;

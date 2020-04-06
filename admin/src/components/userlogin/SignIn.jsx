@@ -24,6 +24,7 @@ import { makeStyles,createMuiTheme } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { reactLocalStorage } from 'reactjs-localstorage';
 import { useSnackbarContext } from 'contexts/SnackBarProvider.jsx';
+import { useTranslation } from 'react-i18next'
 
 const APIKEY = process.env.REACT_APP_APPKEY
 const USERNAME = 'username'
@@ -89,6 +90,7 @@ export default function SignIn({onLogin}) {
   const classes = useStyles();
   const [valid,setValid] = useState(false)
   const {active,account,error} = useWeb3Context()
+  const {t} = useTranslation()
   const showSnackbar = useSnackbarContext()
   const [values, setValues] = React.useState({
       [USERNAME]:'',
@@ -112,7 +114,7 @@ export default function SignIn({onLogin}) {
           if(onLogin)
             onLogin()
       }else{
-          showSnackbar("用户名密码错误","error",null)
+          showSnackbar(t("invalid_username_password"),"error")
       }
 
   }
@@ -148,7 +150,7 @@ export default function SignIn({onLogin}) {
                  <LockOutlinedIcon />
                </Avatar>
                <Typography component="h1" variant="h5">
-                 Sign in
+                 {t("sign_in")}
                </Typography>
                <form className={classes.form} onSubmit = {onSubmit}>
                    <ThemeProvider theme={theme}>
@@ -158,7 +160,7 @@ export default function SignIn({onLogin}) {
                          className={classes.margin}
                          value={values.username}
                          onChange={handleChange(USERNAME)}
-                         label="Username"
+                         label={t("username")}
                          id="mui-theme-provider-outlined-input"
                        />
                  </ThemeProvider>
@@ -166,7 +168,7 @@ export default function SignIn({onLogin}) {
                  <FormControl
                      fullWidth
                      className={clsx(classes.margin, classes.textField)}>
-                   <InputLabel htmlFor="adornment-password">Password</InputLabel>
+                   <InputLabel htmlFor="adornment-password">{t("password")}</InputLabel>
                    <Input
                      fullWidth
                      required
@@ -192,7 +194,7 @@ export default function SignIn({onLogin}) {
                    control={<Checkbox value="remember"
                        checked={values.checked}
                        onChange={handleChangeBox} color="primary" />}
-                   label="Remember me"
+                   label={t("remember_me")}
                  />
                  <Button
                    type="submit"
@@ -202,7 +204,7 @@ export default function SignIn({onLogin}) {
                    disabled={!valid}
                    className={classes.submit}
                  >
-                   Sign In
+                   {t("sign_in")}
                  </Button>
                </form>
              </div>

@@ -71,7 +71,7 @@ def createCoin(coin_name):
     price = int(info['price'] * (10**18))
     amount = info['amount']
     svg = getIcon(info['icon'])
-    args = [0,amount, price, beneficiary, 'https://kaihua.xyz/nd/token/',svg]
+    args = [5,3, price, beneficiary, 'https://kaihua.xyz/nd/token/',svg]
     nonce = w3.eth.getTransactionCount(my_address)
     unicorn_txn = Token.functions.createToken(*args).buildTransaction({
         'nonce': nonce,
@@ -105,7 +105,7 @@ def buyCoin(token_type, owner):
     nonce = w3.eth.getTransactionCount(my_address)
     unicorn_txn = Token.functions.buyToken(*args).buildTransaction({
         'nonce': nonce,
-        'value': int(0.6666 * 10**18)
+        'value': int(0.12 * 10**18)
         # 'gas':300000
     })
     signed_txn = w3.eth.account.signTransaction(
@@ -117,6 +117,24 @@ def buyCoin(token_type, owner):
         print("交易成功")
     else:
         print("交易失败")
+
+
+def mintToken(token_type,owners):
+    nonce = w3.eth.getTransactionCount(my_address)
+    unicorn_txn = Token.functions.mintToken(token_type,owners).buildTransaction({
+        'nonce': nonce,
+        # 'gas':300000
+    })
+    signed_txn = w3.eth.account.signTransaction(
+        unicorn_txn, private_key=private_key)
+    hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    print("赠送纪念币交易已经发送")
+    result = w3.eth.waitForTransactionReceipt(hash)
+    if result.status == 1:
+        print("交易成功")
+    else:
+        print("交易失败")
+
 
 #纪念币发行总数量
 def getSupply():
@@ -182,10 +200,10 @@ def changeBaseURI(typeId,new_uri):
 getTypeAmount()
 # changeBaseURI(0x100000000000000000000000000000000,"https://kaihua.xyz/daism/token/")
 
-# buyCoin(0x100000000000000000000000000000000,my_address)
+# buyCoin(0x200000000000000000000000000000000,my_address)
 # getTokenBalance(my_address)
 # buyCoin(0x300000000000000000000000000000000,work_address)
-# mintToken(0x100000000000000000000000000000000,work_address)
+mintToken(0x200000000000000000000000000000000,[my_address])
 # getTokenBalance(work_address)
 # getTokenURI(0x100000000000000000000000000000001)
 # getTokenURI(0x400000000000000000000000000000001)

@@ -119,9 +119,9 @@ function AllTokens({history}) {
                     let type_array = []
                     for(let i=0;i<r.length;i++) {
                         type_array.push( + r[i])
-                        if (!stale) {
-                            setTypeArray(type_array)
-                        }
+                    }
+                    if (!stale) {
+                        setTypeArray(type_array)
                     }
                 }).catch(e => {})
             }else {
@@ -163,7 +163,6 @@ function AllTokens({history}) {
                     let nonce = typeArray[i]
                     //判断是否本地存在svg
                     let info = getSvg(nonce) || {}
-                    //存在
                     if (!info[SVG]) {
                         actual_array.push(nonce)
                         all_promise.push(contract.getTypeSVG(nonce))
