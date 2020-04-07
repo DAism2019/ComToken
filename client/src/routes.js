@@ -15,9 +15,9 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. */
 // @material-ui/icons
 
-import LibraryBooks from "@material-ui/icons/LibraryBooks";
+import Person from "@material-ui/icons/Person"
 import BubbleChart from "@material-ui/icons/BubbleChart";
-import Unarchive from "@material-ui/icons/Unarchive";
+import Detail from "@material-ui/icons/Explore"
 
 import LatestTokens from "views/LatestTokens/LatestTokens.jsx";
 import MyTokens from "views/MyTokens/MyTokens.jsx";
@@ -26,21 +26,21 @@ import TokenDetail from "views/TokenDetail/TokenDetail.jsx";
 const dashboardRoutes = [{
         path: "latest",
         name: "latest_token",
-        icon: LibraryBooks,
+        icon: BubbleChart,
         component: LatestTokens,
         layout: "/"
     },
     {
         path: "mine",
         name: "my_token",
-        icon: BubbleChart,
+        icon: Person,
         component: MyTokens,
         layout: "/"
     },
     {
         path: "detail",
         name: "token_detail",
-        icon: Unarchive,
+        icon: Detail,
         component: TokenDetail,
         layout: "/"
     }
