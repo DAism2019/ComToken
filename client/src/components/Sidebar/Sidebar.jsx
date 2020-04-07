@@ -28,6 +28,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Icon from "@material-ui/core/Icon";
+import { useTranslation } from 'react-i18next'
 // core components
 import AdminNavbarLinks from "components/Navbars/AdminNavbarLinks.jsx";
 // import RTLNavbarLinks from "components/Navbars/RTLNavbarLinks.jsx";
@@ -35,6 +36,7 @@ import AdminNavbarLinks from "components/Navbars/AdminNavbarLinks.jsx";
 import sidebarStyle from "assets/jss/material-dashboard-react/components/sidebarStyle.jsx";
 
 const Sidebar = ({ ...props }) => {
+  const {t} = useTranslation()
   // verifies if routeName is the one active (in browser input)
   function activeRoute(routeName) {
     return window.location.href.indexOf(routeName) > -1 ? true : false;
@@ -82,7 +84,7 @@ const Sidebar = ({ ...props }) => {
                 />
               )}
               <ListItemText
-                primary={props.rtlActive ? prop.rtlName : prop.name}
+                primary={t(props.rtlActive ? prop.rtlName : prop.name)}
                 className={classNames(classes.itemText, whiteFontClasses, {
                   [classes.itemTextRTL]: props.rtlActive
                 })}

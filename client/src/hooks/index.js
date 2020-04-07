@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useWeb3Context } from 'web3-react'
-import { getMoleContract } from '../utils'
+import { getTokenContract } from '../utils'
 
 
 // modified from https://usehooks.com/useDebounce/
@@ -49,12 +49,12 @@ export function useBodyKeyDown(targetKey, onKeyDown, suppressOnKeyDown = false) 
 }
 
 // returns null on errors
-export function useMoleContract(withSignerIfPossible = true) {
+export function useTokenContract(withSignerIfPossible = true) {
   const { networkId, library, account } = useWeb3Context()
 
   return useMemo(() => {
     try {
-      return getMoleContract(networkId, library, withSignerIfPossible ? account : undefined)
+      return getTokenContract(networkId, library, withSignerIfPossible ? account : undefined)
     } catch {
       return null
     }

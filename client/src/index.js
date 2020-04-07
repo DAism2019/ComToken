@@ -28,6 +28,7 @@ import Admin from "layouts/Admin.jsx";
 import "assets/css/material-dashboard-react.css?v=1.7.0";
 //provider
 import SnackBarProvider from 'contexts/SnackBarProvider.jsx'
+import SVGProvider,{useStorage} from 'contexts/SVGProvider.jsx'
 
 const isAdmin = process.env.REACT_APP_ISADMIN === 'true'
 
@@ -50,11 +51,13 @@ function LoginPanel() {
         <ThemeProvider>
             <Web3Provider connectors={connectors} libraryName="ethers.js">
                 <SnackBarProvider>
-                    {
-                        (isAdmin && !logined)
-                            ? <UserLogin onLogin={onLogined}/>
-                            : <MainPanel/>
-                    }
+                    <SVGProvider>
+                        {
+                            (isAdmin && !logined)
+                                ? <UserLogin onLogin={onLogined}/>
+                                : <MainPanel/>
+                        }
+                    </SVGProvider>                  
                 </SnackBarProvider>
             </Web3Provider>
         </ThemeProvider>
@@ -62,6 +65,7 @@ function LoginPanel() {
 }
 
 function MainPanel() {
+    useStorage()
     return (
         isAdmin ?
           <Router  basename={getPathBase()}>
