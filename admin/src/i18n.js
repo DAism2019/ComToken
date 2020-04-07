@@ -12,10 +12,10 @@ i18next.use(XHR).use(LanguageDetector).use(initReactI18next).init({
     react: {
         useSuspense: true
     },
-    // lng: 'en',  默认语言
+    // lng: 'en',  // 默认语言
     fallbackLng: 'en',
     preload: [
-        'en', 'zh','zh-CN'
+        'en','zh','zh-CN'
     ],
     keySeparator: false,
     interpolation: {

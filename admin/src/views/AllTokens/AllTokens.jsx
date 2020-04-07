@@ -187,10 +187,11 @@ function AllTokens({history}) {
                             }
                             _cards.push([actual_array[i],svg,name])
                         }
-                        if(!stale) {
-                            updateMany(payload)
-                            setCards(_cards)
-                        }
+                        updateMany(payload)
+                        // if(!stale) {
+                            // updateMany(payload)
+                            // setCards(_cards)
+                        // }
                     })
                 }else{
                     setCards(_cards)

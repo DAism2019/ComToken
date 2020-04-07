@@ -25,6 +25,8 @@ def main():
         json.dump(en, f)
     with open('zh-CN.json', 'w', encoding='utf-8') as f2:
         json.dump(zh, f2,ensure_ascii=False)
+    with open('zh.json', 'w', encoding='utf-8') as f3:
+        json.dump(zh, f3,ensure_ascii=False)
     print("convert to json success")
 
 

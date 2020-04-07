@@ -400,9 +400,9 @@ function TokenDetail({ history }) {
                             description
                         }
                         updateOne(type, payLoad)
-                        if (!stale) {
-                            setMeta(payLoad)
-                        }
+                        // if (!stale) {
+                        //     setMeta(payLoad)
+                        // }
                     })
                 } else {      
                     setMeta(meta_info)
