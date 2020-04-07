@@ -52,7 +52,7 @@ const switchRoutes = (
       }
       return null;
     })}
-    <Redirect from="/" to="/all" />
+    <Redirect from="/" to="/latest" />
   </Switch>
 );
 

@@ -16,34 +16,25 @@
 // @material-ui/icons
 
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import HowToReg from "@material-ui/icons/HowToReg";
 import BubbleChart from "@material-ui/icons/BubbleChart";
 import Unarchive from "@material-ui/icons/Unarchive";
 
-import CreateToken from "views/CreateToken/CreateToken.jsx";
-import AllTokens from "views/AllTokens/AllTokens.jsx";
-import OwnerAdmin from "views/OwnerAdmin/OwnerAdmin.jsx";
+import LatestTokens from "views/LatestTokens/LatestTokens.jsx";
+import MyTokens from "views/MyTokens/MyTokens.jsx";
 import TokenDetail from "views/TokenDetail/TokenDetail.jsx";
 
 const dashboardRoutes = [{
-        path: "all",
-        name: "all_token",
+        path: "latest",
+        name: "latest_token",
         icon: LibraryBooks,
-        component: AllTokens,
+        component: LatestTokens,
         layout: "/"
     },
     {
-        path: "create",
-        name: "create_token",
+        path: "mine",
+        name: "my_token",
         icon: BubbleChart,
-        component: CreateToken,
-        layout: "/"
-    },
-    {
-        path: "owner",
-        name: "owner_admin",
-        icon: HowToReg,
-        component: OwnerAdmin,
+        component: MyTokens,
         layout: "/"
     },
     {
