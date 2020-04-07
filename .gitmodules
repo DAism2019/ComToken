@@ -1,0 +1,3 @@
+[submodule "server/tokenGoServer"]
+	path = server/tokenGoServer
+	url = git@gitee.com:TianCaoJiangLin/tokenGoServer.git
