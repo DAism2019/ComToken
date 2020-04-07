@@ -130,7 +130,6 @@ function LatestTokens({ history }) {
     //更新纪念币图标信息等
     useEffect(() => {
         if (contract && typeArray.length > 0) {
-            let stale = false
             function getTokenInfo() {
                 let _cards = []
                 let all_promise = []
@@ -161,21 +160,14 @@ function LatestTokens({ history }) {
                                 issuer,
                                 description
                             }
-                            _cards.push([actual_array[i], svg, name])
                         }
-                        if (!stale) {
-                            updateMany(payload)
-                        }
+                        updateMany(payload)
                     })
                 } else {
                     setCards(_cards)
                 }
             }
             getTokenInfo()
-
-            return () => {
-                stale = true
-            }
         }
     }, [contract, typeArray, getSvg, updateMany])
 

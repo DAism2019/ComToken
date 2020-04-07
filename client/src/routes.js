@@ -16,11 +16,11 @@
 // @material-ui/icons
 
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-// import BubbleChart from "@material-ui/icons/BubbleChart";
+import BubbleChart from "@material-ui/icons/BubbleChart";
 import Unarchive from "@material-ui/icons/Unarchive";
 
 import LatestTokens from "views/LatestTokens/LatestTokens.jsx";
-// import MyTokens from "views/MyTokens/MyTokens.jsx";
+import MyTokens from "views/MyTokens/MyTokens.jsx";
 import TokenDetail from "views/TokenDetail/TokenDetail.jsx";
 
 const dashboardRoutes = [{
@@ -30,13 +30,13 @@ const dashboardRoutes = [{
         component: LatestTokens,
         layout: "/"
     },
-    // {
-    //     path: "mine",
-    //     name: "my_token",
-    //     icon: BubbleChart,
-    //     component: MyTokens,
-    //     layout: "/"
-    // },
+    {
+        path: "mine",
+        name: "my_token",
+        icon: BubbleChart,
+        component: MyTokens,
+        layout: "/"
+    },
     {
         path: "detail",
         name: "token_detail",

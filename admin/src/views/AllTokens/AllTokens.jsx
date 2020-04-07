@@ -185,13 +185,8 @@ function AllTokens({history}) {
                                 issuer,
                                 description
                             }
-                            _cards.push([actual_array[i],svg,name])
                         }
                         updateMany(payload)
-                        // if(!stale) {
-                            // updateMany(payload)
-                            // setCards(_cards)
-                        // }
                     })
                 }else{
                     setCards(_cards)
