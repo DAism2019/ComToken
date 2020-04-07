@@ -259,6 +259,9 @@ function CreateToken({ history }) {
                             label={t("input_beneficiary_address")} value={beneficiary}
                             onChange={handleChange('beneficiary')} className={classes.textField}
                             margin="normal" variant="outlined" />
+                        <div className={classes.note} >
+                            {t("input_token_logo")}
+                        </div>
                         <div className={classes.buttonWrapper}>
                             <FilePicker
                                 extensions={['svg']}

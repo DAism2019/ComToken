@@ -225,7 +225,7 @@ function TokenDetail({ history }) {
         let _price = values.newPrice
         _price = + _price;
         if (Number.isNaN(_price)) {
-            return showSnackbar(t("invalid_price"), 'error')
+            return showSnackbar(t("invalid_input"), 'error')
         }
         _price = utils.parseEther("" + _price);
         let typeId = convertTypeBaseToType(type)
