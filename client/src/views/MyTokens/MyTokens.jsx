@@ -146,7 +146,7 @@ function MyTokens({ history }) {
         let typeId = convertTypeIdToBase(id)
         let info = getSvg(typeId) || {}
         if (!info[SVG]) {
-          if (types.indexOf(typeId) !== -1) {
+          if (types.indexOf(typeId) === -1) {
             types.push(typeId)
           }
         } else {
@@ -270,7 +270,7 @@ function MyTokens({ history }) {
             {cards.map(card => (
               <AlbumSvgItem key={card[0].toHexString()}
                 codeSource={card[1]}
-                tokenId={card[0]}
+                tokenId={card[0].toHexString()}
                 name={card[2]}
                 onSend={onSend(card[0])}
                 onSell={onSell(card[0])}
