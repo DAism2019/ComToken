@@ -71,7 +71,7 @@ def createCoin(coin_name):
     price = int(info['price'] * (10**18))
     amount = info['amount']
     svg = getIcon(info['icon'])
-    args = [5,3, price, beneficiary, 'https://kaihua.xyz/nd/token/',svg]
+    args = [0,amount, price, beneficiary, 'https://kaihua.xyz/nd/token/',svg]
     nonce = w3.eth.getTransactionCount(my_address)
     unicorn_txn = Token.functions.createToken(*args).buildTransaction({
         'nonce': nonce,
@@ -196,14 +196,14 @@ def changeBaseURI(typeId,new_uri):
 # createCoin('gold')
 # createCoin('rosegold')
 # createCoin('silver')
-# createCoin('mouse')
-getTypeAmount()
+createCoin('mouse')
+# getTypeAmount()
 # changeBaseURI(0x100000000000000000000000000000000,"https://kaihua.xyz/daism/token/")
 
 # buyCoin(0x200000000000000000000000000000000,my_address)
 # getTokenBalance(my_address)
 # buyCoin(0x300000000000000000000000000000000,work_address)
-mintToken(0x200000000000000000000000000000000,[my_address])
+# mintToken(0x200000000000000000000000000000000,[my_address])
 # getTokenBalance(work_address)
 # getTokenURI(0x100000000000000000000000000000001)
 # getTokenURI(0x400000000000000000000000000000001)
