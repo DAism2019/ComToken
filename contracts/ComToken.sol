@@ -56,6 +56,7 @@ contract ComToken is ERC721Full, Ownable {
     event CreateToken(address indexed creator,uint typeId);
     event ChangePrice(address indexed operator,uint indexed typeId,uint newPrice);
     event ChangeBaseURI(address indexed operator,uint indexed typeId,string newURI);
+    event ChangeIcon(address indexed operator,uint indexed typeId);
     event BuyToken(address indexed _buyer,address indexed _recipient, uint _tokenId);
     event MintToken(address indexed _operator,uint indexed typeId);
 
@@ -239,6 +240,12 @@ contract ComToken is ERC721Full, Ownable {
         TokenInfo storage info = tokenInfos[typeId];
         info.baseURI = _url;
         emit ChangeBaseURI(info.creator,typeId,_url);
+    }
+
+    function changeIcon(uint typeId,string calldata _svg) external onlyCreator(typeId) {
+        TokenInfo storage info = tokenInfos[typeId];
+        info.icon = _svg;
+        emit ChangeIcon(info.creator,typeId);
     }
 
     //兼容alpha钱包

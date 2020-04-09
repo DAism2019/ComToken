@@ -30,6 +30,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useTokenContract } from 'hooks';
 import { isAddress,getFirstContextByLabel,convertTypeIdToBase,convertTypeBaseToType } from 'utils';
 import { useWeb3Context } from 'web3-react';
+import { FilePicker } from 'react-file-picker'
 import styled from 'styled-components'
 import { utils,constants } from 'ethers'
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -69,6 +70,11 @@ const useStyles = makeStyles(theme => ({
         width: "10%",
         backgroundColor: '#FF8623'
     },
+    selectButton: {
+        backgroundColor: '#FF8623',
+        marginTop: "10px",
+        marginLeft: isMobile ? "200px" : 0
+    },
     priceUpdate: {
         marginTop: theme.spacing(-2),
     }
@@ -98,6 +104,7 @@ const info_init = {
 const value_init = {
     newPrice: "",
     newBaseURI: "",
+    svgCode:"",
     to: ""
 }
 
@@ -116,6 +123,7 @@ function TokenDetail({ history }) {
     const { account } = useWeb3Context()
     const showSnackbar = useSnackbarContext()
     const ref = useRef()
+    const refNew = useRef()
     const { t } = useTranslation()
     const [infos, setInfos] = useState(info_init)
     const [values, setValues] = useState(value_init)
@@ -195,6 +203,18 @@ function TokenDetail({ history }) {
         });
     };
 
+    function getSvgFile(fileObject) {
+        // setFileName(fileObject['name'])
+        fileObject.text().then(result => {
+            if (result.length > 11000)
+                return showSnackbar(t("size_over_limit"), 'warning');
+            setValues({
+                ...values,
+                svgCode: result
+            });
+        })
+    }
+
     //批量赠送代币
     function doMint(event) {
         event.preventDefault()
@@ -231,6 +251,20 @@ function TokenDetail({ history }) {
         let typeId = convertTypeBaseToType(type)
         if (contract) {
             contract.changePrice(typeId, _price, {
+                gasPrice: utils.parseUnits('6.0', 'gwei')
+            }).then(response => {
+                showSnackbar(t("transaction_send_success"), 'success')
+            }).catch(err => {
+                showSnackbar(err.message, 'error')
+            });
+        }
+    }
+    //更改发行价格
+    function doUpdateIcon(event) {
+        event.preventDefault()
+        let typeId = convertTypeBaseToType(type)
+        if (contract) {
+            contract.changeIcon(typeId, values.svgCode, {
                 gasPrice: utils.parseUnits('6.0', 'gwei')
             }).then(response => {
                 showSnackbar(t("transaction_send_success"), 'success')
@@ -312,6 +346,40 @@ function TokenDetail({ history }) {
             </div>
         )
     }
+    //显示更改SVG图标面板
+    function showIconPanel() {
+        return (
+            <div>
+                <ContentWrapper>
+                    {t("change_icon")}
+                </ContentWrapper>
+                <form onSubmit={doUpdateIcon} autoComplete="off" className={classes.priceUpdate} >
+                    <FormControl margin="normal" required fullWidth>
+                    <div className={classes.buttonWrapper}>
+                            <FilePicker
+                                extensions={['svg']}
+                                onChange={fileObject => getSvgFile(fileObject)}
+                                onError={errMsg => (showSnackbar(errMsg, 'error'))}
+                            >
+                                <Button variant="contained" className={classes.selectButton}>
+                                    {t("select")}
+                                </Button>
+                            </FilePicker>
+                        </div>
+                    </FormControl>
+                    <LogoWrapper ref={refNew} />
+                    <ButtonWrapper>
+                        <Button variant="contained"
+                            type="submit"
+                            disabled={!valid}
+                            className={classes.transferButton}>
+                            {t("update")}
+                        </Button>
+                    </ButtonWrapper>
+                </form>
+            </div>
+        )
+    }
 
     //显示更新baseURI面板
     function showURIPanel() {
@@ -357,6 +425,18 @@ function TokenDetail({ history }) {
         }
     }, [hash])
 
+    //refresh svg imgae
+    useEffect(() => {
+        if (refNew.current && values.svgCode) {
+            parse(values.svgCode).then(result => {
+                let new_json = result;
+                new_json.attributes.height = '300px'
+                new_json.attributes.width = '300px'
+                refNew.current.innerHTML = stringify(new_json)
+            })
+        }
+    }, [values.svgCode])
+
     //判断是否存在
     useEffect(() => {
         if(tempType && contract) {
@@ -400,9 +480,6 @@ function TokenDetail({ history }) {
                             description
                         }
                         updateOne(type, payLoad)
-                        // if (!stale) {
-                        //     setMeta(payLoad)
-                        // }
                     })
                 } else {      
                     setMeta(meta_info)
@@ -472,6 +549,28 @@ function TokenDetail({ history }) {
         }
     }, [type,getSvg,updateOne,contract])
 
+    //强制刷新
+    useEffect(()=> {
+        if(type > 0 && contract) {
+            let typeId = convertTypeBaseToType(type)
+            let filter = contract.filters.ChangeIcon(account,typeId)
+            contract.on(filter,(operator,typeId,event) => {
+                contract.getTypeSVG(type).catch(e => {}).then(svg =>{
+                    let name = getFirstContextByLabel(svg, NAME)
+                    let issuer = getFirstContextByLabel(svg, ISSUER)
+                    let description = getFirstContextByLabel(svg, DESCRIPTION) || getFirstContextByLabel(svg, DESC)
+                    let payLoad = {
+                        svg,
+                        name,
+                        issuer,
+                        description
+                    }
+                    updateOne(type, payLoad)
+                })
+            })
+        }
+    },[type,contract,updateOne,account])
+
     //refresh svg imgae
     useEffect(() => {
         if (ref.current && meta.svg) {
@@ -540,9 +639,11 @@ function TokenDetail({ history }) {
                         {showInfos()}
                         {showExtraInfos()}
                         <Divider style={{marginTop:"20px",marginBottom:"20px"}}/>
+                        {showMintPanel()}
                         {showPricePanel()}
                         {showURIPanel()}
-                        {showMintPanel()}
+                        {showIconPanel()}
+                        
                     </div>
                     : type === 0 ? <h3>{t("no_token")}</h3>
                     : <h3>{t("is_getting")}</h3>
