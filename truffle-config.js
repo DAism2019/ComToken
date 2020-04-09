@@ -76,7 +76,7 @@ module.exports = {
       network_id: 3, // Ropsten's id
       confirmations: 2, // # of confs to wait between deployments. (default: 0)
       timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
-      gasPrice: 6 * (10 ** 9),
+      // gasPrice: 6 * (10 ** 9),
       skipDryRun: true // Skip dry run before migrations? (default: false for public nets )
     },
 
@@ -87,7 +87,7 @@ module.exports = {
       network_id: 4, // rinkeby's id
       confirmations: 2, // # of confs to wait between deployments. (default: 0)
       networkCheckTimeout: 100000,
-      gasPrice: 6 * (10 ** 9),
+      // gasPrice: 6 * (10 ** 9),
       // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true // Skip dry run before migrations? (default: false for public nets )
     },
@@ -100,7 +100,7 @@ module.exports = {
       confirmations: 2, // # of confs to wait between deployments. (default: 0)
       timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
       networkCheckTimeout: 10000,
-      gasPrice: 6 * (10 ** 9),
+      // gasPrice: 6 * (10 ** 9),
       skipDryRun: true // Skip dry run before migrations? (default: false for public nets )
     }
 
