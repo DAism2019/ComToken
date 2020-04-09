@@ -18,5 +18,10 @@
         "price":0.16666,
         "amount":6666,
         "icon":"cnt-2020.svg"
+    },
+    "test":{
+        "price":0.06666,
+        "amount":16666,
+        "icon":"cnt-test.svg"
     }
 }

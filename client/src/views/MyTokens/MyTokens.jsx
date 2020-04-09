@@ -130,7 +130,7 @@ function MyTokens({ history }) {
 
   //刷新indexArray
   useEffect(() => {
-    if (contract && tokenCount > 0 && account) {
+    if (contract && account && tokenCount >= 0) {
       let idArray = getIndexArray(tokenCount, PAGE_SIZE, offset)
       setTokenIndexArray(idArray);
     }
@@ -138,7 +138,7 @@ function MyTokens({ history }) {
 
   //根据tokenID显示图标
   useEffect(() => {
-    if (contract && account && tokenIdArray.length > 0) {
+    if (contract && account > 0) {
       let types = []
       let _cards = []
       for (let i = 0; i < tokenIdArray.length; i++) {
@@ -186,7 +186,7 @@ function MyTokens({ history }) {
 
   //刷新纪念币tokenId列表
   useEffect(() => {
-    if (contract && account && tokenIndexArray.length > 0) {
+    if (contract && account ) {
       let stale = false
       function getTokenInfoByOffset() {
         let allPromise = []
@@ -203,10 +203,12 @@ function MyTokens({ history }) {
               setTokenIdArray(token_ids)
             }
           })
+        }else{
+          setTokenIdArray([])
         }
-
       }
       getTokenInfoByOffset()
+
       return () => {
         stale = true
       }

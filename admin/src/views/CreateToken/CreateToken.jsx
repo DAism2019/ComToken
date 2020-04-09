@@ -102,7 +102,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const BASE_URI = "http://kaihua.xyz:5050/mnt/token/"
+const BASE_URI = "http://kaihua.xyz:5050/token/"
 
 const valuesInit = {
     limit: 0,

@@ -154,7 +154,6 @@ function AllTokens({history}) {
     //更新纪念币信息
     useEffect(()=>{
         if( contract && account && typeArray.length > 0){
-            let stale = false
             function getTokenInfoByOffset(){
                 let _cards = []
                 let all_promise = []
@@ -193,9 +192,6 @@ function AllTokens({history}) {
                 }
             }
             getTokenInfoByOffset()
-            return ()=>{
-              stale = true
-            }
         }
     },[contract,account,typeArray,getSvg,updateMany,offset])
 
