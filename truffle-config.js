@@ -42,70 +42,73 @@ module.exports = {
     // options below to some value.
     //
     development: {
-     host: "localhost",     // Localhost (default: none)
-     port: 8545,            // Standard Ethereum port (default: none)
-     network_id: 5777,       // Any network (default: none)
-     gasPrice:6*(10 ** 9)
+      host: "localhost", // Localhost (default: none)
+      port: 8545, // Standard Ethereum port (default: none)
+      network_id: 5777, // Any network (default: none)
+      gasPrice: 6 * (10 ** 9)
     },
 
     // Another network with more advanced options...
     // advanced: {
-      // port: 8777,             // Custom port
-      // network_id: 1342,       // Custom network
-      // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
-      // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
-      // from: <address>,        // Account to send txs from (default: accounts[0])
-      // websockets: true        // Enable EventEmitter interface for web3 (default: false)
+    // port: 8777,             // Custom port
+    // network_id: 1342,       // Custom network
+    // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
+    // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
+    // from: <address>,        // Account to send txs from (default: accounts[0])
+    // websockets: true        // Enable EventEmitter interface for web3 (default: false)
     // },
 
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     mainnet: {
       provider: () => new HDWalletProvider(mnemonic, `https://mainnet.infura.io/v3/${infuraKey}`),
-      network_id: 1,       // mainnet's id
-      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true,     // Skip dry run before migrations? (default: false for public nets )
-      gasPrice:6*(10 ** 9)
+      network_id: 1, // mainnet's id
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true, // Skip dry run before migrations? (default: false for public nets )
+      gasPrice: 6 * (10 ** 9)
     },
 
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     ropsten: {
       provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/${infuraKey}`),
-      network_id: 3,       // Ropsten's id
-      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+      network_id: 3, // Ropsten's id
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+      gasPrice: 6 * (10 ** 9),
+      skipDryRun: true // Skip dry run before migrations? (default: false for public nets )
     },
 
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     rinkeby: {
       provider: () => new HDWalletProvider(mnemonic, `https://rinkeby.infura.io/v3/${infuraKey}`),
-      network_id: 4,       // rinkeby's id
-      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      networkCheckTimeout:100000,
+      network_id: 4, // rinkeby's id
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      networkCheckTimeout: 100000,
+      gasPrice: 6 * (10 ** 9),
       // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+      skipDryRun: true // Skip dry run before migrations? (default: false for public nets )
     },
 
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     kovan: {
       provider: () => new HDWalletProvider(mnemonic, `https://kovan.infura.io/v3/${infuraKey}`),
-      network_id: 42,       // kovan's id
-      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      networkCheckTimeout:10000,
-      skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+      network_id: 42, // kovan's id
+      confirmations: 2, // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200, // # of blocks before a deployment times out  (minimum/default: 50)
+      networkCheckTimeout: 10000,
+      gasPrice: 6 * (10 ** 9),
+      skipDryRun: true // Skip dry run before migrations? (default: false for public nets )
     }
 
     // Useful for private networks
     // private: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
-      // network_id: 2111,   // This network is yours, in the cloud.
-      // production: true    // Treats this network as if it was a public net. (default: false)
+    // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
+    // network_id: 2111,   // This network is yours, in the cloud.
+    // production: true    // Treats this network as if it was a public net. (default: false)
     // }
   },
 
@@ -117,7 +120,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "0.5.16",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.5.16", // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use true you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {

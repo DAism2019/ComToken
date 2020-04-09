@@ -231,8 +231,7 @@ function MyTokens({ history }) {
 
 
   const onSell = (tokenId) => event => {
-    let url = OPENSEA_URL + contract.address + '/' + tokenId.toString()+"/sell"
-    // let url_fale = OPENSEA_URL + '0xe3a69aacd1b368a6407f7879da9127ceb7d34b07' + "/1?"
+    let url = OPENSEA_URL + contract.address + '/' + tokenId.toString()
     window.open(url)
   }
   const onSubmit = (event) => {

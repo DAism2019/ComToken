@@ -10,8 +10,8 @@
 from contract import Token
 from privateKey import my_address, private_key
 from os.path import dirname, abspath
-# from web3.auto.infura.rinkeby import w3
-from web3.auto import w3
+from web3.auto.infura.rinkeby import w3
+# from web3.auto import w3
 from urllib.request import urlopen
 from json import loads
 import ssl
