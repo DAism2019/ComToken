@@ -33,7 +33,7 @@ import { useWeb3Context } from 'web3-react';
 import { parse, stringify } from 'svgson'
 import styled from 'styled-components'
 import { ethers } from 'ethers'
-import { isAddress } from "utils"
+import { isAddress,getFirstContextByLabel } from "utils"
 import { FilePicker } from 'react-file-picker'
 import { isMobile } from 'react-device-detect'
 import { useSnackbarContext } from 'contexts/SnackBarProvider.jsx';
@@ -103,6 +103,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const BASE_URI = "http://kaihua.xyz:5050/token/"
+const NAME = "name"
+const ISSUER = "issuer"
+const DESCRIPTION = "description"
+const DESC = "desc"
 
 const valuesInit = {
     limit: 0,
@@ -156,6 +160,14 @@ function CreateToken({ history }) {
         if (!svgCode) {
             return showSnackbar(t('error_svg'), 'error');
         }
+        let name = getFirstContextByLabel(svgCode,NAME)
+        let desc = getFirstContextByLabel(svgCode,DESC)
+        let description = getFirstContextByLabel(svgCode,DESCRIPTION)
+        let issuer = getFirstContextByLabel(svgCode,ISSUER)
+        if(!name || !issuer || (!desc && !description)) {
+            return showSnackbar(t('label_absence'), 'error');
+        }
+
         if (contract) {
             contract.createToken(_limit, _buyLimit, _price, beneficiary, BASE_URI, svgCode, {
                 gasPrice: ethers.utils.parseUnits('2.5', 'gwei')
