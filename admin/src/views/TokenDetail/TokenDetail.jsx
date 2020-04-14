@@ -27,13 +27,13 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import { makeStyles } from '@material-ui/core/styles';
-import { useTokenContract } from 'hooks';
+import { useTokenInfoContract } from 'hooks';
 import { isAddress,getFirstContextByLabel,convertTypeIdToBase,convertTypeBaseToType } from 'utils';
 import { useWeb3Context } from 'web3-react';
 import { FilePicker } from 'react-file-picker'
 import styled from 'styled-components'
 import { utils,constants } from 'ethers'
-import InputAdornment from '@material-ui/core/InputAdornment';
+// import InputAdornment from '@material-ui/core/InputAdornment';
 import { isMobile } from 'react-device-detect'
 import { parse, stringify } from 'svgson'
 import { useTranslation } from 'react-i18next'
@@ -70,6 +70,11 @@ const useStyles = makeStyles(theme => ({
         width: "10%",
         backgroundColor: '#FF8623'
     },
+    lockBtn:{
+        margin: theme.spacing(2),
+        width: "10%",
+        backgroundColor: '#FF8623'
+    },
     selectButton: {
         backgroundColor: '#FF8623',
         marginTop: "10px",
@@ -96,6 +101,8 @@ const info_init = {
     buyLimit: constants.Zero,
     buyAmount: constants.Zero,
     price: 0,
+    repu:0,
+    issuer:"",
     beneficiary: "",     //这个数据后台管理才需要
     baseURI: ""         //这个数据后台管理才需要
 }
@@ -110,8 +117,6 @@ const value_init = {
 
 const SVG = 'svg'
 const NAME = "name"
-const ISSUER = "issuer"
-const DESCRIPTION = "description"
 const DESC = "desc"
 
 function TokenDetail({ history }) {
@@ -119,7 +124,7 @@ function TokenDetail({ history }) {
     const hash = history.location.hash;
     const [type, setType] = useState(-1);
     const [tempType,setTempType] = useState()
-    const contract = useTokenContract()
+    const contract = useTokenInfoContract()
     const { account } = useWeb3Context()
     const showSnackbar = useSnackbarContext()
     const ref = useRef()
@@ -130,22 +135,20 @@ function TokenDetail({ history }) {
     const [meta, setMeta] = useState(meta_init)
     const getSvg = useGetStorageByNonce()
     const updateOne = useUpdateStorageByNonce()
+    const [isLock,setIsLock] = useState(false)
 
     const valid = account && infos.creator && account === infos.creator
     const send_rest = infos.limit.sub(infos.buyLimit).sub(infos.amount.sub(infos.buyAmount))
 
     function showMeta() {
-        const { name, description, issuer } = meta;
+        const { name, desc } = meta;
         return (
             <div>
                 <ContentWrapper>
                     {t("token_name") + ": " + name}
                 </ContentWrapper>
                 <ContentWrapper>
-                    {t("issue_org") + ":" + issuer}
-                </ContentWrapper>
-                <ContentWrapper>
-                    {t("token_descrip") + ": " + description}
+                    {t("token_descrip") + ": " + desc}
                 </ContentWrapper>
             </div>
         )
@@ -153,7 +156,7 @@ function TokenDetail({ history }) {
 
     //显示代币数量和价格信息，客户端也可使用
     function showInfos() {
-        const { creator, limit, amount, buyLimit, buyAmount, price } = infos;
+        const { creator,repu, limit, amount, buyLimit, buyAmount, price } = infos;
         return (
             <div>
                 <ContentWrapper>
@@ -177,13 +180,16 @@ function TokenDetail({ history }) {
                 <ContentWrapper>
                     {t("token_price") + ": " + utils.formatEther(price) + ' ETH'}
                 </ ContentWrapper>
+                <ContentWrapper>
+                    {t("token_repu") + ": " + repu}
+                </ ContentWrapper>
             </div>
         )
     }
 
     //显示代币一些额外信息，后台使用
     function showExtraInfos() {
-        const { beneficiary, baseURI } = infos
+        const { beneficiary, baseURI,issuer } = infos
         return (
             <div>
                 <ContentWrapper>
@@ -191,6 +197,17 @@ function TokenDetail({ history }) {
                 </ContentWrapper>
                 <ContentWrapper>
                     {t("token_baseURI") + ": " + baseURI}
+                </ContentWrapper>
+                <ContentWrapper>
+                    {t("issue_org") + ": " + issuer}
+                </ContentWrapper>
+                <ContentWrapper>
+                    {t("is_lock") + ": " + isLock}
+                    {!isLock && <span>
+                        <Button className={classes.lockBtn} onClick={doLock} >
+                            Lock
+                        </Button>
+                    </span> }
                 </ContentWrapper>
             </div>
         )
@@ -202,6 +219,20 @@ function TokenDetail({ history }) {
             [name]: event.target.value
         });
     };
+
+    const doLock = event => {
+        event.preventDefault()
+        if (contract) {
+            let typeId = convertTypeBaseToType(type)
+            contract.lockIcon(typeId, {
+                gasPrice: utils.parseUnits('6.0', 'gwei')
+            }).then(response => {
+                showSnackbar(t("transaction_send_success"), 'success')
+            }).catch(err => {
+                showSnackbar(err.message, 'error')
+            });
+        } 
+    }
 
     function getSvgFile(fileObject) {
         // setFileName(fileObject['name'])
@@ -218,18 +249,18 @@ function TokenDetail({ history }) {
     //批量赠送代币
     function doMint(event) {
         event.preventDefault()
-        let _from = [];
+        let _to = [];
         let _source = values.to.split(',');
         for (let i = 0; i < _source.length; i++) {
             let _address = _source[i].trim()
             if (!isAddress(_address)) {
                 return showSnackbar(t("invalid_address"), 'error')
             }
-            _from.push(_address)
+            _to.push(_address)
         }
         let typeId = convertTypeBaseToType(type)
         if (contract) {
-            contract.mintToken(typeId, _from, {
+            contract.bitchGiftToken(typeId, _to, {
                 gasPrice: utils.parseUnits('6.0', 'gwei')
             }).then(response => {
                 showSnackbar(t("transaction_send_success"), 'success')
@@ -239,27 +270,7 @@ function TokenDetail({ history }) {
         }
     }
 
-    //更改发行价格
-    function doUpdatePrice(event) {
-        event.preventDefault()
-        let _price = values.newPrice
-        _price = + _price;
-        if (Number.isNaN(_price)) {
-            return showSnackbar(t("invalid_input"), 'error')
-        }
-        _price = utils.parseEther("" + _price);
-        let typeId = convertTypeBaseToType(type)
-        if (contract) {
-            contract.changePrice(typeId, _price, {
-                gasPrice: utils.parseUnits('6.0', 'gwei')
-            }).then(response => {
-                showSnackbar(t("transaction_send_success"), 'success')
-            }).catch(err => {
-                showSnackbar(err.message, 'error')
-            });
-        }
-    }
-    //更改发行价格
+    //更改发行ICON
     function doUpdateIcon(event) {
         event.preventDefault()
         let typeId = convertTypeBaseToType(type)
@@ -317,35 +328,7 @@ function TokenDetail({ history }) {
 
         )
     }
-    //显示更新价格面板
-    function showPricePanel() {
-        return (
-            <div>
-                <ContentWrapper>
-                    {t("change_price")}
-                </ContentWrapper>
-                <form onSubmit={doUpdatePrice} autoComplete="off" className={classes.priceUpdate} >
-                    <FormControl margin="normal" required fullWidth>
-                        <TextField required id="outlined-name-required"
-                            label={t('new_price')} value={values.newPrice}
-                            onChange={handleChange('newPrice')} className={classes.textField}
-                            InputProps={{
-                                endAdornment: <InputAdornment position="end">ETH</InputAdornment>
-                            }}
-                            margin="normal" variant="outlined" />
-                    </FormControl>
-                    <ButtonWrapper>
-                        <Button variant="contained"
-                            type="submit"
-                            disabled={!valid}
-                            className={classes.transferButton}>
-                            {t("update")}
-                        </Button>
-                    </ButtonWrapper>
-                </form>
-            </div>
-        )
-    }
+
     //显示更改SVG图标面板
     function showIconPanel() {
         return (
@@ -471,13 +454,11 @@ function TokenDetail({ history }) {
                 if (!meta_info[SVG]) {
                     contract.getTypeSVG(type).catch(e => {}).then(svg =>{
                         let name = getFirstContextByLabel(svg, NAME)
-                        let issuer = getFirstContextByLabel(svg, ISSUER)
-                        let description = getFirstContextByLabel(svg, DESCRIPTION) || getFirstContextByLabel(svg, DESC)
+                        let desc = getFirstContextByLabel(svg, DESC)
                         let payLoad = {
                             svg,
                             name,
-                            issuer,
-                            description
+                            desc
                         }
                         updateOne(type, payLoad)
                     })
@@ -496,6 +477,8 @@ function TokenDetail({ history }) {
                     let buyLimit = r[1][2]
                     let buyAmount = r[1][3]
                     let price = r[1][4]
+                    let repu = r[1][5]
+                    let issuer = r[2]
                     if(!stale) {
                         setInfos(oldInfos => ({
                             ...oldInfos,
@@ -505,7 +488,9 @@ function TokenDetail({ history }) {
                             amount,
                             buyLimit,
                             buyAmount,
-                            price
+                            price,
+                            repu,
+                            issuer
                         }))
                     }
                 }).catch(e => {})
@@ -513,7 +498,7 @@ function TokenDetail({ history }) {
 
             //获取uri
             function getBaseURI() {
-                contract.getTypeURI(type).then(r => {
+                contract.baseTokenURIByNonce(type).then(r => {
                     if(!stale){
                         setInfos(oldInfos => (
                             {
@@ -525,14 +510,27 @@ function TokenDetail({ history }) {
                 }).catch(e => {})
             }
 
+            function getIsLock() {
+                contract.getIsLockByNonce(type).then(r => {
+                    if(!stale){
+                        setIsLock(r)
+                    }
+                }).catch(e => {})
+            }
+
             getMeta()
             getAmountInfo()
             getBaseURI()
+            getIsLock()
             //todo 监听事件 此处没有filters的问题
             let typeId = convertTypeBaseToType(type)
-            let mintFilter = contract.filters.MintToken(null,typeId)
+            let mintFilter = contract.filters.BitchGiftToken(null,typeId)
+            let lockFilter = contract.filters.LockIcon(null,typeId)
             contract.on(mintFilter,(_operator,typeId,event)=>{
                 getAmountInfo()
+            })
+            contract.on(lockFilter,(_operator,typeId,event)=>{
+                getIsLock()
             })
             contract.on("BuyToken",(_buyer,_recipient,_tokenId,event)=>{
                 let _nonce = convertTypeIdToBase(_tokenId)
@@ -543,8 +541,8 @@ function TokenDetail({ history }) {
 
             return () => {
                 stale = true
+                contract.removeAllListeners('BitchGiftToken')
                 contract.removeAllListeners('BuyToken')
-                contract.removeAllListeners('MintToken')
             }
         }
     }, [type,getSvg,updateOne,contract])
@@ -557,13 +555,11 @@ function TokenDetail({ history }) {
             contract.on(filter,(operator,typeId,event) => {
                 contract.getTypeSVG(type).catch(e => {}).then(svg =>{
                     let name = getFirstContextByLabel(svg, NAME)
-                    let issuer = getFirstContextByLabel(svg, ISSUER)
-                    let description = getFirstContextByLabel(svg, DESCRIPTION) || getFirstContextByLabel(svg, DESC)
+                    let desc = getFirstContextByLabel(svg, DESC)
                     let payLoad = {
                         svg,
                         name,
-                        issuer,
-                        description
+                        desc
                     }
                     updateOne(type, payLoad)
                 })
@@ -583,25 +579,12 @@ function TokenDetail({ history }) {
         }
     }, [meta.svg])
 
-    //监听更改价格和baseURI事件
+    //监听更改baseURI事件
     //这里在本机测试filters问题，使用filters后会多次收到回调，需要在测试网上测试
     useEffect(() => {
         if (contract && account && type > 0 ) {
             let stale = false;
             let typeId = convertTypeBaseToType(type)
-            let priceFilter = contract.filters.ChangePrice(account,typeId)
-            contract.on(priceFilter, (operator, typeId, newPrice, event) => {
-                console.log("in filter")
-                if (!stale) {
-                    setInfos(oldInfos => (
-                        {
-                            ...oldInfos,
-                            price: newPrice
-                        }
-                    ))
-                    showSnackbar(t("update_price_success"), 'success')
-                }
-            });
             let uriFilter = contract.filters.ChangeBaseURI(account, typeId)
             contract.on(uriFilter, (operator, typeId, newURI, event) => {
                 if (!stale) {
@@ -617,7 +600,6 @@ function TokenDetail({ history }) {
 
             return () => {
                 stale = true;
-                contract.removeAllListeners('ChangePrice')
                 contract.removeAllListeners('ChangeBaseURI')
             }
         }
@@ -640,9 +622,10 @@ function TokenDetail({ history }) {
                         {showExtraInfos()}
                         <Divider style={{marginTop:"20px",marginBottom:"20px"}}/>
                         {showMintPanel()}
-                        {showPricePanel()}
+                        <Divider style={{marginTop:"20px",marginBottom:"20px"}}/>
                         {showURIPanel()}
-                        {showIconPanel()}
+                        {!isLock && <Divider style={{marginTop:"20px",marginBottom:"20px"}}/>}
+                        {!isLock && showIconPanel()}
                         
                     </div>
                     : type === 0 ? <h3>{t("no_token")}</h3>

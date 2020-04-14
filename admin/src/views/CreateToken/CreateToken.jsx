@@ -28,7 +28,7 @@ import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { makeStyles } from '@material-ui/core/styles';
-import { useTokenContract } from 'hooks';
+import { useTokenInfoContract } from 'hooks';
 import { useWeb3Context } from 'web3-react';
 import { parse, stringify } from 'svgson'
 import styled from 'styled-components'
@@ -38,6 +38,7 @@ import { FilePicker } from 'react-file-picker'
 import { isMobile } from 'react-device-detect'
 import { useSnackbarContext } from 'contexts/SnackBarProvider.jsx';
 import { useTranslation } from 'react-i18next'
+import { Divider } from "@material-ui/core";
 
 
 // const ZERO_ADDRESS = ethers.constants.AddressZero
@@ -102,13 +103,13 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+const PRICE_URL = "https://api.pro.coinbase.com/products/ETH-USD/ticker"
 const BASE_URI = "http://kaihua.xyz:5050/token/"
 const NAME = "name"
-const ISSUER = "issuer"
-const DESCRIPTION = "description"
 const DESC = "desc"
 
 const valuesInit = {
+    issuer:"",
     limit: 0,
     buyLimit: 0,
     price: 0,
@@ -119,15 +120,15 @@ const valuesInit = {
 function CreateToken({ history }) {
     const classes = useStyles()
     const { t } = useTranslation()
-    const contract = useTokenContract()
+    const contract = useTokenInfoContract()
     const { account } = useWeb3Context()
     const showSnackbar = useSnackbarContext()
     const [owner, setOwner] = useState("")
     const ref = useRef()
     const [values, setValues] = useState(valuesInit)
+    const [ethPrice,setEthPrice] = useState(0)
 
     function getSvgFile(fileObject) {
-        // setFileName(fileObject['name'])
         fileObject.text().then(result => {
             if (result.length > 11000)
                 return showSnackbar(t("size_over_limit"), 'warning');
@@ -140,7 +141,7 @@ function CreateToken({ history }) {
 
     const doCreate = (event) => {
         event.preventDefault();
-        const { limit, buyLimit, beneficiary, price, svgCode } = values;
+        const { issuer,limit, buyLimit, beneficiary, price, svgCode } = values;
         let _limit = + limit;
         if (Number.isNaN(_limit)) {
             return showSnackbar(t('error_maxLimit'), 'error');
@@ -160,16 +161,21 @@ function CreateToken({ history }) {
         if (!svgCode) {
             return showSnackbar(t('error_svg'), 'error');
         }
+        if(!issuer) {
+            return showSnackbar(t('empty_issuer'), 'error');
+        }
         let name = getFirstContextByLabel(svgCode,NAME)
         let desc = getFirstContextByLabel(svgCode,DESC)
-        let description = getFirstContextByLabel(svgCode,DESCRIPTION)
-        let issuer = getFirstContextByLabel(svgCode,ISSUER)
-        if(!name || !issuer || (!desc && !description)) {
+        if(!name || !desc ) {
             return showSnackbar(t('label_absence'), 'error');
         }
-
+        if(ethPrice === 0) {
+            return showSnackbar(t("err_get_ethPrice"),"error")
+        }
+        let repu = parseInt((+price)*(ethPrice)*10000)
         if (contract) {
-            contract.createToken(_limit, _buyLimit, _price, beneficiary, BASE_URI, svgCode, {
+            let args0 = [repu,_price,_limit,_buyLimit]
+            contract.createToken(args0,issuer,beneficiary, BASE_URI, svgCode, {
                 gasPrice: ethers.utils.parseUnits('2.5', 'gwei')
             }).then(response => {
                 showSnackbar(t('transaction_send_success'), 'success')
@@ -188,6 +194,33 @@ function CreateToken({ history }) {
             [name]: event.target.value
         });
     };
+
+    const onRefresh = e => {
+        e.preventDefault()
+        fetch(PRICE_URL).then(resp => resp.json()).then( r => {
+            setEthPrice(+r.price)
+        }).catch(e => {
+            showSnackbar(t("err_get_ethPrice"),"error")
+        })
+
+    }
+
+    useEffect(() => {
+        if (account && contract) {
+            let stale = false
+            fetch(PRICE_URL).then(resp => resp.json()).then( r => {
+                if(stale)
+                    return;
+                setEthPrice(+r.price)
+            }).catch(e => {
+                showSnackbar(t("err_get_ethPrice"),"error")
+            })
+
+            return ()=> {
+                stale = true
+            }
+        }
+    },[account,contract,t,showSnackbar])
     //refresh svg imgae
     useEffect(() => {
         if (ref.current && values.svgCode) {
@@ -236,7 +269,7 @@ function CreateToken({ history }) {
         }
     }, [account, contract, history, showSnackbar, t]);
 
-    const { limit, buyLimit, beneficiary, price } = values;
+    const { limit,issuer, buyLimit, beneficiary, price } = values;
     const valid = owner && account && account === owner
     return (
         <Card>
@@ -249,6 +282,10 @@ function CreateToken({ history }) {
             <CardBody>
                 <form onSubmit={doCreate} autoComplete="off" >
                     <FormControl margin="normal" required fullWidth>
+                        <TextField required id="outlined-issuer-required"
+                            label={t("issue_org")} value={issuer}
+                            onChange={handleChange('issuer')} className={classes.textField}
+                            margin="normal" variant="outlined" />
                         <TextField required id="outlined-limit-required"
                             label={t("input_token_maxLimit")} value={limit}
                             onChange={handleChange('limit')} className={classes.textField}
@@ -271,6 +308,17 @@ function CreateToken({ history }) {
                             label={t("input_beneficiary_address")} value={beneficiary}
                             onChange={handleChange('beneficiary')} className={classes.textField}
                             margin="normal" variant="outlined" />
+                        <TextField required id="outlined-ethprice-required"
+                            label={t("eth_price")} value={"$" + ethPrice}
+                            readOnly
+                            className={classes.textField}
+                            margin="normal" variant="outlined" />
+                        <div className={classes.buttonWrapper}>
+                            <Button variant="contained"  onClick={onRefresh} className={classes.selectButton}>
+                                {t("refresh")}
+                            </Button>
+                        </div>  
+                        <Divider style={{marginTop:"20px",marginBottom:"20px"}}/>
                         <div className={classes.note} >
                             {t("input_token_logo")}
                         </div>

@@ -1,6 +1,7 @@
 import { ethers,utils } from 'ethers'
 import TOKEN_ABI from 'constants/abis/token.json'
-import { TOKEN_ADDRESS } from '../constants'
+import TOKEN_INFO_ABI from 'constants/abis/info.json'
+import { TOKEN_ADDRESS,TOKEN_INFO_ADDRESS } from '../constants'
 import UncheckedJsonRpcSigner from './signer'
 
 const ZERO_UINT128 = "00000000000000000000000000000000"
@@ -121,6 +122,10 @@ export function getContract(address, ABI, library, account) {
 
 export function getTokenContract(networkId,library,account){
     return getContract(TOKEN_ADDRESS[networkId], TOKEN_ABI, library, account)
+}
+
+export function getTokenInfoContract(networkId,library,account){
+  return getContract(TOKEN_INFO_ADDRESS[networkId], TOKEN_INFO_ABI, library, account)
 }
 
 

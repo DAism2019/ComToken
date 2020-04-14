@@ -1,17 +1,17 @@
 # 测试代币合约，内容主要有：
-# 1、纪念币创建
-# 2、纪念币发行
-# 3、纪念币列举
-# 4、纪念币交易
-# 5、纪念币元数据
-# 6、纪念币最初购买者
-# 7、纪念币总数量
-# 8、更改纪念币价格与URI
-from contract import Token
+# 1、纪念币创建  通过
+# 2、纪念币批量赠送  通过
+# 3、纪念币列举  通过
+# 4、纪念币交易  通过
+# 5、纪念币元数据  通过
+# 6、每个用户在各组织的声望 
+# 7、纪念币总数量  通过
+# 8、更改纪念币ICON、锁定与URI 通过
+from contract import Token,TokenInfo
 from privateKey import my_address, private_key
 from os.path import dirname, abspath
-from web3.auto.infura.rinkeby import w3
-# from web3.auto import w3
+# from web3.auto.infura.rinkeby import w3
+from web3.auto import w3
 from urllib.request import urlopen
 from json import loads
 import ssl
@@ -23,7 +23,7 @@ import ssl
 
 # 用来进行https访问
 ssl._create_default_https_context = ssl._create_unverified_context
-beneficiary = '0x2267E877215fC21514BF507F30f553AF2342b6c2'
+beneficiary = '0xD03955E14071F534B89662c1Aa12C11aFE085e6C'
 work_address = '0x2267E877215fC21514BF507F30f553AF2342b6c2'
 
 
@@ -42,23 +42,30 @@ def getIcon(svg_name):
     return svg
 
 
+def getRepu(issuer,account):
+    repu = TokenInfo.functions.allRepu(issuer,account).call()
+    print("当前在组织 " + issuer + " 的声望为:", repu)
+
+
 #纪念币链上信息
 def getTypeAmount():
-    amount = Token.functions.nonce().call()
+    amount = TokenInfo.functions.nonce().call()
     print("当前创建的纪念币数量为:", amount, "编号分别为:")
     for i in range(amount):
         index = (i + 1) << 128
         print("当前纪念币的类型编号为:", hex(index))
-        info = Token.functions.getInfoByNonce(i+1).call()
+        info = TokenInfo.functions.getInfoByNonce(i+1).call()
         print("纪念币创建者为:", info[0][0])
         print("纪念币收益人为:", info[0][1])
-        print("发行上限为:", info[1][0])
+        print("发行上限为:", hex(info[1][0]))
         print("已发行数量为:", info[1][1])
         print("出售上限为:", info[1][2])
         print("已出售数量为:", info[1][3])
         print("发行价格为:", info[1][4] / 10**18, " ETH")
-        baseURI = Token.functions.getTypeURI(i+1).call()
-        print("基准URI为:",baseURI)
+        print("纪念值为:", info[1][5])
+        print("发行组织为:", info[2])
+        baseURI = TokenInfo.functions.baseTokenURIByNonce(i+1).call()
+        print("baseURI为:",baseURI)
 
 
 
@@ -70,10 +77,12 @@ def createCoin(coin_name):
     info = infos[coin_name]
     price = int(info['price'] * (10**18))
     amount = info['amount']
+    repu = int(info['price'] * 158.47 * 10000)
     svg = getIcon(info['icon'])
-    args = [0,amount, price, beneficiary, 'https://kaihua.xyz/nd/token/',svg]
+    args0 = [repu,price,0,amount]
+    args = [args0,"naturalDAO",beneficiary, 'https://kaihua.xyz/nd/token/',svg]
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = Token.functions.createToken(*args).buildTransaction({
+    unicorn_txn = TokenInfo.functions.createToken(*args).buildTransaction({
         'nonce': nonce,
         # 'gas':9000000,
         'gasPrice': 3 * (10 ** 9)
@@ -103,9 +112,9 @@ def getTokenBalance(address):
 def buyCoin(token_type, owner):
     args = [token_type, owner]
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = Token.functions.buyToken(*args).buildTransaction({
+    unicorn_txn = TokenInfo.functions.buyToken(*args).buildTransaction({
         'nonce': nonce,
-        'value': int(0.12 * 10**18)
+        'value': int(0.6666 * 10**18)
         # 'gas':300000
     })
     signed_txn = w3.eth.account.signTransaction(
@@ -119,9 +128,9 @@ def buyCoin(token_type, owner):
         print("交易失败")
 
 
-def mintToken(token_type,owners):
+def giftToken(token_type,owners):
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = Token.functions.mintToken(token_type,owners).buildTransaction({
+    unicorn_txn = TokenInfo.functions.bitchGiftToken(token_type,owners).buildTransaction({
         'nonce': nonce,
         # 'gas':300000
     })
@@ -154,36 +163,59 @@ def getTokenURI(token_id):
             print("访问uri错误")
 
 
-#更改纪念币价格
-def changePrice(typeId,newPrice):
-    args = [typeId, int(newPrice * 10**18)]
+def changeIcon(typeId,coin_name):
+    infos = getInfos()
+    info = infos[coin_name]
+    svg = getIcon(info['icon'])
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = Token.functions.changePrice(*args).buildTransaction({
-        'nonce': nonce,
-        'gas':300000
+    unicorn_txn = TokenInfo.functions.changeIcon(typeId,svg).buildTransaction({
+        'nonce': nonce
     })
     signed_txn = w3.eth.account.signTransaction(
         unicorn_txn, private_key=private_key)
     hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-    print("更改纪念币价格交易已经发送")
+    print("更改ICON交易已经发送")
     result = w3.eth.waitForTransactionReceipt(hash)
     if result.status == 1:
         print("更改成功")
     else:
         print("更改失败")
+
+
+def lockIcon(index):
+    isLock = TokenInfo.functions.getIsLockByNonce(index).call()
+    print("当前ICON锁定状态为:",isLock)
+    if (isLock):
+        return
+    nonce = w3.eth.getTransactionCount(my_address)
+    typeId = index << 128
+    unicorn_txn = TokenInfo.functions.lockIcon(typeId).buildTransaction({
+        'nonce': nonce
+    })
+    signed_txn = w3.eth.account.signTransaction(
+        unicorn_txn, private_key=private_key)
+    hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    print("更改锁定状态交易已经发送")
+    result = w3.eth.waitForTransactionReceipt(hash)
+    if result.status == 1:
+        print("更改成功")
+    else:
+        print("更改失败")
+    isLock = TokenInfo.functions.getIsLockByNonce(index).call()
+    print("当前ICON锁定状态为:",isLock)
+
 
 
 #更改baseuri
 def changeBaseURI(typeId,new_uri):
     args = [typeId, new_uri]
     nonce = w3.eth.getTransactionCount(my_address)
-    unicorn_txn = Token.functions.changeBaseURI(*args).buildTransaction({
+    unicorn_txn = TokenInfo.functions.changeBaseURI(*args).buildTransaction({
         'nonce': nonce,
     })
     signed_txn = w3.eth.account.signTransaction(
         unicorn_txn, private_key=private_key)
     hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-    print("更改baseURI交易已经发送")
     result = w3.eth.waitForTransactionReceipt(hash)
     if result.status == 1:
         print("更改成功")
@@ -191,23 +223,45 @@ def changeBaseURI(typeId,new_uri):
         print("更改失败")
 
 
-# https://rinkeby.opensea.io/assets/0xA064202d4EBd9bD618082c002d4a4C0f0DB0Cfb3/340282366920938463463374607431768211457
-# https://rinkeby.opensea.io/assets/0xA064202d4EBd9bD618082c002d4a4C0f0DB0Cfb3/680564733841876926926749214863536422913
+def transferToken(recipient,tokenId):
+    args = [my_address,recipient,tokenId]
+    nonce = w3.eth.getTransactionCount(my_address)
+    unicorn_txn = Token.functions.transferFrom(*args).buildTransaction({
+        'nonce': nonce,
+    })
+    signed_txn = w3.eth.account.signTransaction(
+        unicorn_txn, private_key=private_key)
+    hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    result = w3.eth.waitForTransactionReceipt(hash)
+    if result.status == 1:
+        print("更改成功")
+    else:
+        print("更改失败")
+
+
+
 # createCoin('gold')
 # createCoin('rosegold')
 # createCoin('silver')
 # createCoin('mouse')
-# getTypeAmount()
+getTypeAmount()
 # changeBaseURI(0x100000000000000000000000000000000,"https://kaihua.xyz/daism/token/")
+# getTypeAmount()
+# lockIcon(1)
+# changeIcon(0x100000000000000000000000000000000,"silver")
+# buyCoin(0x100000000000000000000000000000000,my_address)
+# getTokenBalance(beneficiary)
+# transferToken(work_address,0x100000000000000000000000000000001)
 
-# buyCoin(0x200000000000000000000000000000000,my_address)
-# getTokenBalance(my_address)
-# buyCoin(0x300000000000000000000000000000000,work_address)
-# mintToken(0x200000000000000000000000000000000,[my_address])
+# getTokenBalance(beneficiary)
+# buyCoin(0x100000000000000000000000000000000,work_address)
 # getTokenBalance(work_address)
-getTokenURI(0x100000000000000000000000000000001)
+# giftToken(0x100000000000000000000000000000000,[my_address,beneficiary])
+# getTokenBalance(work_address)
+# getTokenURI(0x100000000000000000000000000000001)
 # getTokenURI(0x400000000000000000000000000000001)
 # getSupply()
 # getOrigin(0x200000000000000000000000000000001)
 # changePrice(0x100000000000000000000000000000000,0.008)
+# getRepu("naturalDAO",my_address)
 

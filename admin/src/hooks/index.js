@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useWeb3Context } from 'web3-react'
-import { getTokenContract } from '../utils'
+import { getTokenContract,getTokenInfoContract } from '../utils'
 
 
 // modified from https://usehooks.com/useDebounce/
@@ -55,6 +55,19 @@ export function useTokenContract(withSignerIfPossible = true) {
   return useMemo(() => {
     try {
       return getTokenContract(networkId, library, withSignerIfPossible ? account : undefined)
+    } catch {
+      return null
+    }
+  }, [networkId, library, withSignerIfPossible, account])
+}
+
+// returns null on errors
+export function useTokenInfoContract(withSignerIfPossible = true) {
+  const { networkId, library, account } = useWeb3Context()
+
+  return useMemo(() => {
+    try {
+      return getTokenInfoContract(networkId, library, withSignerIfPossible ? account : undefined)
     } catch {
       return null
     }

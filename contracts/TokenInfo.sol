@@ -34,8 +34,6 @@ contract TokenInfo is Ownable {
     ERCTokenInterface public token;
     //纪念币类型数量
     uint256 public nonce;
-    //组织是否注册过
-    mapping(string => bool) public hasIssuers;
     //每个账户在每个组织的声望总值
     mapping(string => mapping(address => uint256)) public allRepu; //名称 => 地址 => repu
     //所有纪念币类型信息
@@ -233,6 +231,7 @@ contract TokenInfo is Ownable {
             false
         );
         tokenInfos[typeId] = info;
+        nftTypes[_msgSender()].push(nonce);
         emit CreateToken(_msgSender(), typeId);
     }
 
@@ -241,13 +240,8 @@ contract TokenInfo is Ownable {
         string memory _issuer,
         uint256 _limit,
         uint256 _buyLimit
-    ) internal returns (uint256) {
+    ) internal pure returns (uint256) {
         require(bytes(_issuer).length != 0, "TokenInfo: empty issuer");
-        require(
-            !hasIssuers[_issuer],
-            "TokenInfo: the name of issuer has been used"
-        );
-        hasIssuers[_issuer] = true;
         require(
             _buyLimit <= LOWER_LIMIT && _limit <= LOWER_LIMIT,
             "TokenInfo: out of LIMIT"
@@ -280,7 +274,7 @@ contract TokenInfo is Ownable {
         );
         info.buyAmount++;
         info.amount++;
-        uint256 tokenId = typeId & info.amount;
+        uint256 tokenId = typeId | info.amount;
         uint[] memory ids = new uint[](1);
         ids[0] = tokenId;
         address[] memory to = new address[](1);
@@ -310,7 +304,7 @@ contract TokenInfo is Ownable {
             allRepu[info.issuer][to[i]] = allRepu[info.issuer][to[i]].add(
                 info.repu
             );
-            uint256 tokenId = typeId & (info.amount + i + 1);
+            uint256 tokenId = typeId | (info.amount + i + 1);
             ids[i] = tokenId;
         }
         info.amount = info.amount.add(len);

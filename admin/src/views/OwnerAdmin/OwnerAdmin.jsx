@@ -25,7 +25,7 @@ import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 // import Search from "@material-ui/icons/Search";
 import { makeStyles } from '@material-ui/core/styles';
-import { useTokenContract } from 'hooks';
+import { useTokenInfoContract } from 'hooks';
 import { useWeb3Context } from 'web3-react';
 import styled from 'styled-components'
 import { ethers } from 'ethers'
@@ -67,7 +67,7 @@ const useStyles = makeStyles(theme => ({
 function OwnerAdmin() {
     const classes = useStyles()
     const { t } = useTranslation()
-    const contract = useTokenContract()
+    const contract = useTokenInfoContract()
     const { account } = useWeb3Context()
     const showSnackbar = useSnackbarContext()
     const [owner, setOwner] = useState("")

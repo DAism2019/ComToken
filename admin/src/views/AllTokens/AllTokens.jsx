@@ -26,7 +26,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import { useWeb3Context } from 'web3-react';
 import { getIndexArray,getFirstContextByLabel} from 'utils'
-import { useTokenContract } from 'hooks';
+import { useTokenInfoContract } from 'hooks';
 import Container from '@material-ui/core/Container';
 import AlbumSvgItem from 'components/AlbumItem/AlbumSvgItem.jsx'
 import Pagination from "material-ui-flat-pagination"
@@ -38,8 +38,6 @@ import {useGetStorageByNonce,useUpdateMany} from 'contexts/SVGProvider'
 const PAGE_SIZE = 8;
 const SVG='svg'
 const NAME="name"
-const ISSUER="issuer"
-const DESCRIPTION="description"
 const DESC="desc"
 
 
@@ -73,7 +71,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function AllTokens({history}) {
-    const contract = useTokenContract()
+    const contract = useTokenInfoContract()
     const {t} = useTranslation()
     const { account } = useWeb3Context()
     const [offset,setOffset] = useState(0)
@@ -98,7 +96,8 @@ function AllTokens({history}) {
               setTypeCount(_typeCount);
           }
           getTokenCount();
-          contract.on("CreateToken", (_operator, _typeId) => {
+          let filter = contract.filters.CreateToken(account)
+          contract.on(filter, (_operator, _typeId) => {
               getTokenCount();
           });
           return () => {
@@ -170,19 +169,17 @@ function AllTokens({history}) {
                     }
                 }
                 if (all_promise.length !== 0) {
-                    Promise.all(all_promise).catch(err => {}).then(r => {
+                    Promise.all(all_promise).catch(err => {console.log(err)}).then(r => {
                         //解析svg
                         let payload = {}
                         for(let i=0;i<r.length;i++) {
                             let svg = r[i]
                             let name = getFirstContextByLabel(svg,NAME)
-                            let issuer = getFirstContextByLabel(svg,ISSUER)
-                            let description = getFirstContextByLabel(svg,DESCRIPTION) || getFirstContextByLabel(svg,DESC)
+                            let desc = getFirstContextByLabel(svg,DESC)
                             payload["" + actual_array[i]] = {
                                 svg,
                                 name,
-                                issuer,
-                                description
+                                desc
                             }
                         }
                         updateMany(payload)
