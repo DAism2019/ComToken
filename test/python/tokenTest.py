@@ -10,8 +10,8 @@
 from contract import Token,TokenInfo
 from privateKey import my_address, private_key
 from os.path import dirname, abspath
-# from web3.auto.infura.rinkeby import w3
-from web3.auto import w3
+from web3.auto.infura.rinkeby import w3
+# from web3.auto import w3
 from urllib.request import urlopen
 from json import loads
 import ssl
@@ -244,7 +244,7 @@ def transferToken(recipient,tokenId):
 # createCoin('rosegold')
 # createCoin('silver')
 # createCoin('mouse')
-getTypeAmount()
+# getTypeAmount()
 # changeBaseURI(0x100000000000000000000000000000000,"https://kaihua.xyz/daism/token/")
 # getTypeAmount()
 # lockIcon(1)

@@ -26,7 +26,7 @@ import CardBody from "components/Card/CardBody.jsx";
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
-import { useTokenContract } from 'hooks';
+import { useTokenInfoContract } from 'hooks';
 import { getFirstContextByLabel, convertTypeIdToBase, convertTypeBaseToType } from 'utils';
 import { useWeb3Context } from 'web3-react';
 import styled from 'styled-components'
@@ -107,6 +107,8 @@ const meta_init = {
 //获取链上其它数据
 const info_init = {
     creator: "",
+    issuer:"",
+    repu:constants.Zero,
     buyLimit: constants.Zero,
     buyAmount: constants.Zero,
     price: 0,
@@ -116,8 +118,6 @@ const info_init = {
 
 const SVG = 'svg'
 const NAME = "name"
-const ISSUER = "issuer"
-const DESCRIPTION = "description"
 const DESC = "desc"
 
 function TokenDetail({ history }) {
@@ -125,7 +125,7 @@ function TokenDetail({ history }) {
     const hash = history.location.hash;
     const [type, setType] = useState(-1);
     const [tempType, setTempType] = useState()
-    const contract = useTokenContract()
+    const contract = useTokenInfoContract()
     const { account } = useWeb3Context()
     const showSnackbar = useSnackbarContext()
     const ref = useRef()
@@ -138,17 +138,14 @@ function TokenDetail({ history }) {
     const [inPanel, setInpanel] = useState(true)
 
     function showMeta() {
-        const { name, description, issuer } = meta;
+        const { name, desc } = meta;
         return (
             <div>
                 <ContentWrapper>
                     {t("token_name") + ": " + name}
                 </ContentWrapper>
                 <ContentWrapper>
-                    {t("issue_org") + ":" + issuer}
-                </ContentWrapper>
-                <ContentWrapper>
-                    {t("token_descrip") + ": " + description}
+                    {t("token_descrip") + ": " + desc}
                 </ContentWrapper>
             </div>
         )
@@ -156,7 +153,7 @@ function TokenDetail({ history }) {
 
     //显示代币数量和价格信息，客户端也可使用
     function showInfos() {
-        const { creator, buyLimit, buyAmount, price } = infos;
+        const { creator, buyLimit, buyAmount, repu,price } = infos;
         return (
             <div>
                 <ContentWrapper>
@@ -170,6 +167,9 @@ function TokenDetail({ history }) {
                 </ContentWrapper>
                 <ContentWrapper>
                     {t("token_price") + ": " + utils.formatEther(price) + ' ETH'}
+                </ ContentWrapper>
+                <ContentWrapper>
+                    {t("token_repu") + ": " + repu}
                 </ ContentWrapper>
             </div>
         )
@@ -231,13 +231,11 @@ function TokenDetail({ history }) {
                 if (!meta_info[SVG]) {
                     contract.getTypeSVG(type).catch(e => { }).then(svg => {
                         let name = getFirstContextByLabel(svg, NAME)
-                        let issuer = getFirstContextByLabel(svg, ISSUER)
-                        let description = getFirstContextByLabel(svg, DESCRIPTION) || getFirstContextByLabel(svg, DESC)
+                        let desc = getFirstContextByLabel(svg, DESC)
                         let payLoad = {
                             svg,
                             name,
-                            issuer,
-                            description
+                            desc
                         }
                         updateOne(type, payLoad)
                     })
@@ -253,12 +251,16 @@ function TokenDetail({ history }) {
                     let buyLimit = r[1][2]
                     let buyAmount = r[1][3]
                     let price = r[1][4]
+                    let repu = r[1][5]
+                    let issuer = r[2]
                     if (!stale) {
                         setInfos({
                             creator,
                             buyLimit,
                             buyAmount,
-                            price
+                            price,
+                            repu,
+                            issuer
                         })
                     }
                 }).catch(e => { })
@@ -290,32 +292,6 @@ function TokenDetail({ history }) {
             })
         }
     }, [meta.svg])
-
-    //监听更改价格和baseURI事件
-    //这里在本机测试filters问题，使用filters后会多次收到回调，需要在测试网上测试
-    useEffect(() => {
-        if (contract && type > 0) {
-            let stale = false;
-            let typeId = convertTypeBaseToType(type)
-            let priceFilter = contract.filters.ChangePrice(null, typeId)
-            contract.on(priceFilter, (operator, typeId, newPrice, event) => {
-                console.log("in filter")
-                if (!stale) {
-                    setInfos(oldInfos => (
-                        {
-                            ...oldInfos,
-                            price: newPrice
-                        }
-                    ))
-                }
-            });
-
-            return () => {
-                stale = true;
-                contract.removeAllListeners('ChangePrice')
-            }
-        }
-    }, [contract, showSnackbar, t, type])
 
     //copyurl地址
     const copyURL = (event) => {

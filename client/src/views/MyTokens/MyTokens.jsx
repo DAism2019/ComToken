@@ -33,7 +33,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { useTokenContract } from 'hooks';
+import { useTokenContract,useTokenInfoContract } from 'hooks';
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import AlbumSvgItem from 'components/AlbumItem/AlbumSvgItem.jsx'
@@ -49,8 +49,6 @@ const OPENSEA_URL = isMainnet ? 'https://opensea.io/assets/' : 'https://rinkeby.
 const PAGE_SIZE = 8;
 const SVG = 'svg'
 const NAME = "name"
-const ISSUER = "issuer"
-const DESCRIPTION = "description"
 const DESC = "desc"
 
 const useStyles = makeStyles(theme => ({
@@ -85,6 +83,7 @@ const useStyles = makeStyles(theme => ({
 function MyTokens({ history }) {
   const classes = useStyles();
   const contract = useTokenContract()
+  const infoContract = useTokenInfoContract()
   const [offset, setOffset] = useState(0)
   const { t } = useTranslation()
   const [tokenCount, setTokenCount] = useState(-1)
@@ -138,7 +137,7 @@ function MyTokens({ history }) {
 
   //根据tokenID显示图标
   useEffect(() => {
-    if (contract && account > 0) {
+    if (contract && infoContract && account > 0) {
       let types = []
       let _cards = []
       for (let i = 0; i < tokenIdArray.length; i++) {
@@ -156,7 +155,7 @@ function MyTokens({ history }) {
       if (types.length > 0) {
         let allPromise = []
         for (let i = 0; i < types.length; i++) {
-          allPromise.push(contract.getTypeSVG(types[i]))
+          allPromise.push(infoContract.getTypeSVG(types[i]))
         }
         Promise.all(allPromise).catch(err => { }).then(r => {
           let payload = {}
@@ -164,13 +163,11 @@ function MyTokens({ history }) {
             let _type = types[i]
             let svg = r[i]
             let name = getFirstContextByLabel(svg, NAME)
-            let issuer = getFirstContextByLabel(svg, ISSUER)
-            let description = getFirstContextByLabel(svg, DESCRIPTION) || getFirstContextByLabel(svg, DESC)
+            let desc = getFirstContextByLabel(svg, DESC)
             payload["" + _type] = {
               svg,
               name,
-              issuer,
-              description
+              desc,
             }
           }
           updateMany(payload)
@@ -182,7 +179,7 @@ function MyTokens({ history }) {
         setCards(_cards)
       }
     }
-  }, [contract, account,getSvg,updateMany,tokenIdArray])
+  }, [contract, infoContract,account,getSvg,updateMany,tokenIdArray])
 
   //刷新纪念币tokenId列表
   useEffect(() => {
