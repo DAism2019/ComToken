@@ -169,7 +169,7 @@ function TokenDetail({ history }) {
                     {t("token_price") + ": " + utils.formatEther(price) + ' ETH'}
                 </ ContentWrapper>
                 <ContentWrapper>
-                    {t("token_repu") + ": " + repu}
+                    {t("token_repu") + ": " +  ((+ repu)/10**6).toFixed(6)}
                 </ ContentWrapper>
             </div>
         )

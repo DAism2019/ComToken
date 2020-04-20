@@ -5,7 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
 
 
 
-contract OwnableDelegateProxy {}
+contract OwnableDelegateProxy {
+    //pass
+}
 
 
 contract ProxyRegistry {
