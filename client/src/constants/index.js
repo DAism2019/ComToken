@@ -1,5 +1,5 @@
 export const TOKEN_ADDRESS = {
-    1: '',
+    1: '0xefb21d94Bbd3271601c64AA7829fFc69788BDC98',
     3: '',
     4: '0x942ef7eB2B69823DBf40d85524BEd03DD16d7004',
     42: '',
@@ -7,7 +7,7 @@ export const TOKEN_ADDRESS = {
 }
 
 export const TOKEN_INFO_ADDRESS = {
-    1: '',
+    1: '0xF030B374Ca9cB71DDde76BD1ce5A15E759a8E81E',
     3: '',
     4: '0xbA27fF40A5f2572DaA856B8a30217259B5038675',
     42: '',
