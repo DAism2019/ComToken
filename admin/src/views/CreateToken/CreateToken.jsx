@@ -104,7 +104,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const PRICE_URL = "https://api.pro.coinbase.com/products/ETH-USD/ticker"
-const BASE_URI = "http://kaihua.xyz:5050/token/"
+const BASE_URI = "http://120.25.202.164:5050/token/"
 const NAME = "name"
 const DESC = "desc"
 
