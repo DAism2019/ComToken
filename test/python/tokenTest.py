@@ -10,8 +10,8 @@
 from contract import Token,TokenInfo
 from privateKey import my_address, private_key
 from os.path import dirname, abspath
-from web3.auto.infura.rinkeby import w3
-# from web3.auto import w3
+# from web3.auto.infura.rinkeby import w3
+from web3.auto import w3
 from urllib.request import urlopen
 from json import loads
 import ssl
@@ -132,6 +132,7 @@ def giftToken(token_type,owners):
     nonce = w3.eth.getTransactionCount(my_address)
     unicorn_txn = TokenInfo.functions.bitchGiftToken(token_type,owners).buildTransaction({
         'nonce': nonce,
+        'from':my_address,
         # 'gas':300000
     })
     signed_txn = w3.eth.account.signTransaction(
@@ -251,11 +252,13 @@ def transferToken(recipient,tokenId):
 # changeIcon(0x100000000000000000000000000000000,"silver")
 # buyCoin(0x100000000000000000000000000000000,my_address)
 # getTokenBalance(beneficiary)
+# getTokenBalance(work_address)
 # transferToken(work_address,0x100000000000000000000000000000001)
 
-# getTokenBalance(beneficiary)
-# buyCoin(0x100000000000000000000000000000000,work_address)
-# getTokenBalance(work_address)
+# getTokenBalance(my_address)
+
+# buyCoin(0x100000000000000000000000000000000,my_address)
+# getTokenBalance(my_address)
 # giftToken(0x100000000000000000000000000000000,[my_address,beneficiary])
 # getTokenBalance(work_address)
 # getTokenURI(0x100000000000000000000000000000001)
