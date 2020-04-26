@@ -130,8 +130,8 @@ function CreateToken({ history }) {
 
     function getSvgFile(fileObject) {
         fileObject.text().then(result => {
-            if (result.length > 11000)
-                return showSnackbar(t("size_over_limit"), 'warning');
+            // if (result.length > 11000)
+            //     return showSnackbar(t("size_over_limit"), 'warning');
             setValues({
                 ...values,
                 svgCode: result
