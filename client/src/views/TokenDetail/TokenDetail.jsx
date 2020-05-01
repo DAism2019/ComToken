@@ -100,8 +100,7 @@ const useStyles = makeStyles(theme => ({
 const meta_init = {
     svg: "",
     name: "",
-    description: "",
-    issuer: ""
+    description: ""
 }
 
 //获取链上其它数据
@@ -119,7 +118,6 @@ const info_init = {
 const SVG = 'svg'
 const NAME = "name"
 const DESC = "desc"
-const ISSUER = "issuer"
 
 function TokenDetail({ history }) {
     const classes = useStyles()
@@ -236,12 +234,10 @@ function TokenDetail({ history }) {
                     contract.getTypeSVG(type).catch(e => { }).then(svg => {
                         let name = getFirstContextByLabel(svg, NAME)
                         let desc = getFirstContextByLabel(svg, DESC)
-                        let issuer = getFirstContextByLabel(svg, ISSUER)
                         let payLoad = {
                             svg,
                             name,
-                            desc,
-                            issuer
+                            desc
                         }
                         updateOne(type, payLoad)
                     })
