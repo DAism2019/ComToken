@@ -119,6 +119,7 @@ const info_init = {
 const SVG = 'svg'
 const NAME = "name"
 const DESC = "desc"
+const ISSUER = "issuer"
 
 function TokenDetail({ history }) {
     const classes = useStyles()
@@ -153,9 +154,12 @@ function TokenDetail({ history }) {
 
     //显示代币数量和价格信息，客户端也可使用
     function showInfos() {
-        const { creator, buyLimit, buyAmount, repu,price } = infos;
+        const { creator, buyLimit, buyAmount, repu,price,issuer } = infos;
         return (
             <div>
+                <ContentWrapper>
+                    {t("issue_org") + ": " + issuer}
+                </ContentWrapper>
                 <ContentWrapper>
                     {t("creator_address") + ": " + creator}
                 </ContentWrapper>
@@ -232,10 +236,12 @@ function TokenDetail({ history }) {
                     contract.getTypeSVG(type).catch(e => { }).then(svg => {
                         let name = getFirstContextByLabel(svg, NAME)
                         let desc = getFirstContextByLabel(svg, DESC)
+                        let issuer = getFirstContextByLabel(svg, ISSUER)
                         let payLoad = {
                             svg,
                             name,
-                            desc
+                            desc,
+                            issuer
                         }
                         updateOne(type, payLoad)
                     })
