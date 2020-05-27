@@ -100,8 +100,7 @@ const useStyles = makeStyles(theme => ({
 const meta_init = {
     svg: "",
     name: "",
-    description: "",
-    issuer: ""
+    description: ""
 }
 
 //获取链上其它数据
@@ -153,9 +152,12 @@ function TokenDetail({ history }) {
 
     //显示代币数量和价格信息，客户端也可使用
     function showInfos() {
-        const { creator, buyLimit, buyAmount, repu,price } = infos;
+        const { creator, buyLimit, buyAmount, repu,price,issuer } = infos;
         return (
             <div>
+                <ContentWrapper>
+                    {t("issue_org") + ": " + issuer}
+                </ContentWrapper>
                 <ContentWrapper>
                     {t("creator_address") + ": " + creator}
                 </ContentWrapper>

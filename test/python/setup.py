@@ -1,7 +1,7 @@
 from contract import Token,TokenInfo
 from privateKey import my_address, private_key
-from web3.auto.infura.rinkeby import w3
-# from web3.auto import w3
+# from web3.auto.infura.rinkeby import w3
+from web3.auto import w3
 
 
 def setup():

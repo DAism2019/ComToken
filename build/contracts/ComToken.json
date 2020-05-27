@@ -7812,12 +7812,13 @@
         }
       },
       "links": {},
-      "address": "0xb8bFE18E3C961860C7bAe8B9807C08371BF398bf",
-      "transactionHash": "0xf2646d69926538c08363a686a5baae82650ea54435482a9f24d00104702ca492"
+      "address": "0x4bB9dC7677e62BBE0E25DCE716F4AE3f4e878Bb1",
+      "transactionHash": "0xf0728795a743e925f596b714d6950d9a27442f4c257c9922754c1e3d7cfa2709"
     }
   },
   "schemaVersion": "3.0.20",
-  "updatedAt": "2020-04-19T10:45:35.143Z",
+  "updatedAt": "2020-04-25T00:38:26.664Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {
       "approve(address,uint256)": {

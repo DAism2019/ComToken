@@ -1,5 +1,5 @@
-from web3.auto.infura.rinkeby import w3
-# from web3.auto import w3
+# from web3.auto.infura.rinkeby import w3
+from web3.auto import w3
 from json import loads
 from os.path import dirname, abspath
 
